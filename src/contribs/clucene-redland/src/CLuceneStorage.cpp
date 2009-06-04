@@ -41,338 +41,193 @@ using namespace lucene::index;
 using namespace lucene::store;
 using namespace lucene::search;
 
+// ================ Single statement stream ===================
+class SingleStatementStream : public CLuceneStream {
+  librdf_statement* the_statement;
+  bool first;
+public:
+  SingleStatementStream(librdf_statement* the_statement, librdf_world* world):
+  CLuceneStream(world)
+  {
+    this->the_statement = the_statement;
+    this->first = true;
+  }
+  ~SingleStatementStream(){
+    if ( this->the_statement ) librdf_free_statement(this->the_statement);
+  }
+  bool is_end(){
+    return !this->first;
+  }
+  virtual bool goto_next(){
+    return false;
+  }
+  virtual librdf_statement* get_statement(int flags){
+    this->first = false;
+    return this->the_statement;
+  }
+
+};
+
 // ================ Common stream stuff ============
-typedef struct{
-  CLuceneStorageImpl* storage;
+class CommonStream : public CLuceneStream {
+public:
   bool is_literal_match;
   librdf_statement* current_statement;
   librdf_node *current_context;
   librdf_statement *query_statement;
   librdf_node *query_context;
-} librdf_storage_clucene_common_stream_data;
 
-void
-librdf_storage_clucene_common_stream_init(librdf_storage_clucene_common_stream_data* data,
-          CLuceneStorageImpl* storage, bool is_literal_match ){
-    data->storage = storage;
-    data->is_literal_match = is_literal_match;
-    data->current_statement = NULL;
-    data->current_context = NULL;
-    data->query_statement = NULL;
-    data->query_context = NULL;
-}
-static void
-librdf_storage_clucene_common_stream_free(librdf_storage_clucene_common_stream_data* data){
-  if ( data->current_statement ) librdf_free_statement(data->current_statement);
-  if ( data->current_context ) librdf_free_node(data->current_context);
-  if ( data->query_context ) librdf_free_node(data->query_context);
-}
-static int
-librdf_storage_clucene_common_stream_goto_next(librdf_storage_clucene_common_stream_data* stream){
-  librdf_node *subject=NULL, *predicate=NULL, *object=NULL;
-  librdf_node *node;
+  CommonStream(librdf_world* world, librdf_statement* statement, librdf_node* context_node, bool is_literal_match):
+    CLuceneStream(world)
+  {
+    this->is_literal_match = is_literal_match;
+    this->current_statement=librdf_new_statement(this->world);
+    this->current_context = NULL;
+    this->query_statement = NULL;
+    this->query_context = NULL;
 
-  /* Get ready for context */
-  if(stream->current_context)
-    librdf_free_node(stream->current_context);
-  stream->current_context=NULL;
+    if ( statement )
+      this->query_statement = librdf_new_statement_from_statement(statement);
+    if ( context_node )
+      this->query_context = librdf_new_node_from_node(context_node);
+  }
+  virtual ~CommonStream(){
+    if ( this->current_statement ) librdf_free_statement(this->current_statement);
+    if ( this->current_context ) librdf_free_node(this->current_context);
+    if ( this->query_context ) librdf_free_node(this->query_context);
+  }
+  virtual bool goto_next(){
+    librdf_node *subject=NULL, *predicate=NULL, *object=NULL;
 
-  /* Is this a query with statement parts? */
-  if(stream->query_statement) {
-    subject=librdf_statement_get_subject(stream->query_statement);
-    predicate=librdf_statement_get_predicate(stream->query_statement);
-    if(stream->is_literal_match)
-      object=NULL;
-    else
-      object=librdf_statement_get_object(stream->query_statement);
+    /* Get ready for context */
+    if(this->current_context)
+      librdf_free_node(this->current_context);
+    this->current_context=NULL;
+
+    /* Is this a query with statement parts? */
+    if(this->query_statement) {
+      subject=librdf_statement_get_subject(this->query_statement);
+      predicate=librdf_statement_get_predicate(this->query_statement);
+      if(this->is_literal_match)
+        object=NULL;
+      else
+        object=librdf_statement_get_object(this->query_statement);
+    }
+
+    /* Query without variables? */
+    if(subject && predicate && object && this->query_context) {
+      librdf_statement_set_subject(this->current_statement,librdf_new_node_from_node(subject));
+      librdf_statement_set_predicate(this->current_statement,librdf_new_node_from_node(predicate));
+      librdf_statement_set_object(this->current_statement,librdf_new_node_from_node(object));
+      this->current_context=librdf_new_node_from_node(this->query_context);
+    } else {
+      /* Subject - constant or from row? */
+      if(subject) {
+        librdf_statement_set_subject(this->current_statement,librdf_new_node_from_node(subject));
+      } else {
+        assert( librdf_statement_get_subject(this->current_statement) != NULL );
+      }
+      /* Predicate - constant or from row? */
+      if(predicate) {
+        librdf_statement_set_predicate(this->current_statement,librdf_new_node_from_node(predicate));
+      } else {
+        assert( librdf_statement_get_predicate(this->current_statement) != NULL );
+      }
+      /* Object - constant or from row? */
+      if(object) {
+        librdf_statement_set_object(this->current_statement,librdf_new_node_from_node(object));
+      } else {
+        assert( librdf_statement_get_object(this->current_statement) != NULL );
+      }
+
+
+
+      /* Context - constant or from row? */
+      if(this->query_context) {
+        this->current_context=librdf_new_node_from_node(this->query_context);
+      } else {
+        //TODO:.....
+      }
+    }
+    return true;
   }
 
-/*printf("===========XXXX==========\n");
-if ( subject )
-printf("subject=%s\n", (char*)librdf_node_to_string(subject));
-if ( (predicate) )
-printf("predicate=%s\n", (char*)librdf_node_to_string(predicate));
-if ( (object) )
-printf("object=%s\n", (char*)librdf_node_to_string((object)));
-*/
+  librdf_statement* get_statement(int flags)
+  {
+    switch(flags) {
+      case LIBRDF_ITERATOR_GET_METHOD_GET_OBJECT:
 
-  /* Query without variables? */
-  if(subject && predicate && object && stream->query_context) {
-    librdf_statement_set_subject(stream->current_statement,librdf_new_node_from_node(subject));
-    librdf_statement_set_predicate(stream->current_statement,librdf_new_node_from_node(predicate));
-    librdf_statement_set_object(stream->current_statement,librdf_new_node_from_node(object));
-    stream->current_context=librdf_new_node_from_node(stream->query_context);
-  } else {
-    /* Subject - constant or from row? */
-    if(subject) {
-      librdf_statement_set_subject(stream->current_statement,librdf_new_node_from_node(subject));
-    } else {
-      /* Resource or Bnode?
-      if(row[part]) {
-        if(!(node=librdf_new_node_from_uri_string(stream->storage->world,
-                                                   (const unsigned char*)row[part])))
-          return 1;
-      } else if(row[part+1]) {
-        if(!(node=librdf_new_node_from_blank_identifier(stream->storage->world,
-                                                         (const unsigned char*)row[part+1])))
-          return 1;
-      } else
-        return 1;
-
-      librdf_statement_set_subject(stream->current_statement,node);
-      part+=2;*/
-      assert( librdf_statement_get_subject(stream->current_statement) != NULL );
-    }
-    /* Predicate - constant or from row? */
-    if(predicate) {
-      librdf_statement_set_predicate(stream->current_statement,librdf_new_node_from_node(predicate));
-    } else {
-      /* Resource?
-      if(row[part]) {
-        if(!(node=librdf_new_node_from_uri_string(stream->storage->world,
-                                                   (const unsigned char*)row[part])))
-          return 1;
-      } else
-        return 1;
-
-      librdf_statement_set_predicate(stream->current_statement,node);
-      part+=1;*/
-      assert( librdf_statement_get_predicate(stream->current_statement) != NULL );
-    }
-    /* Object - constant or from row? */
-    if(object) {
-      librdf_statement_set_object(stream->current_statement,librdf_new_node_from_node(object));
-    } else {
-      /* Resource, Bnode or Literal?
-      if(row[part]) {
-        if(!(node=librdf_new_node_from_uri_string(stream->storage->world,
-                                                   (const unsigned char*)row[part])))
-          return 1;
-      } else if(row[part+1]) {
-        if(!(node=librdf_new_node_from_blank_identifier(stream->storage->world,
-                                                         (const unsigned char*)row[part+1])))
-          return 1;
-      } else if(row[part+2]) {
-        // Typed literal?
-        librdf_uri *datatype=NULL;
-        if(row[part+4] && strlen(row[part+4]))
-          datatype=librdf_new_uri(stream->storage->world,
-                                  (const unsigned char*)row[part+4]);
-        if(!(node=librdf_new_node_from_typed_literal(stream->storage->world,
-                                                      (const unsigned char*)row[part+2],
-                                                      row[part+3],
-                                                      datatype)))
-          return 1;
-      } else
-        return 1;
-
-      librdf_statement_set_object(stream->current_statement,node);
-      part+=5;*/
-      assert( librdf_statement_get_object(stream->current_statement) != NULL );
-    }
-    /* Context - constant or from row? */
-    if(stream->query_context) {
-      stream->current_context=librdf_new_node_from_node(stream->query_context);
-    } else {
-      /* Resource, Bnode or Literal?
-      if(row[part]) {
-        if(!(node=librdf_new_node_from_uri_string(stream->storage->world,
-                                                   (const unsigned char*)row[part])))
-          return 1;
-      } else if(row[part+1]) {
-        if(!(node=librdf_new_node_from_blank_identifier(stream->storage->world,
-                                                         (const unsigned char*)row[part+1])))
-          return 1;
-      } else if(row[part+2]) {
-        // Typed literal?
-        librdf_uri *datatype=NULL;
-        if(row[part+4] && strlen(row[part+4]))
-          datatype=librdf_new_uri(stream->storage->world,
-                                  (const unsigned char*)row[part+4]);
-        if(!(node=librdf_new_node_from_typed_literal(stream->storage->world,
-                                                      (const unsigned char*)row[part+2],
-                                                      row[part+3],
-                                                      datatype)))
-          return 1;
-      } else
-        // no context
-        node=NULL;
-        */
-      //assert(false);
-      //stream->current_context=node;
+  /*
+    printf("===========RETURNING==========\n");
+  if ( librdf_statement_get_subject(stream->common.current_statement) )
+    printf("subject=%s\n", (char*)librdf_node_to_string(librdf_statement_get_subject(stream->common.current_statement)));
+  if ( librdf_statement_get_predicate(stream->common.current_statement) )
+    printf("predicate=%s\n", (char*)librdf_node_to_string(librdf_statement_get_predicate(stream->common.current_statement)));
+  if ( librdf_statement_get_object(stream->common.current_statement) )
+    printf("object=%s\n", (char*)librdf_node_to_string(librdf_statement_get_object(stream->common.current_statement)));
+  */
+        return this->current_statement;
+      case LIBRDF_ITERATOR_GET_METHOD_GET_CONTEXT:
+        assert(false);
+      default:
+        abort();
     }
   }
-  return 0;
-
-}
+};
 
 // ================ TermDocs stream ============
-typedef struct{
-  Term* term;
+class TermDocsStream: public CommonStream {
   TermDocs* termDocs;
   char textBuffer[CLuceneStorageImpl::documentNumberUriSize + 11];
-  librdf_storage_clucene_common_stream_data common;
-} librdf_storage_clucene_termdocs_stream_data;
 
-static void
-librdf_storage_clucene_termdocs_stream_init(librdf_storage_clucene_termdocs_stream_data* data,
-          CLuceneStorageImpl* storage, bool is_literal_match ){
-    data->term = NULL;
-    data->termDocs = NULL;
-    *data->textBuffer = 0;
-    librdf_storage_clucene_common_stream_init(&data->common, storage, is_literal_match);
-}
-static void
-librdf_storage_clucene_termdocs_stream_free(void* context){
-  librdf_storage_clucene_termdocs_stream_data* stream=(librdf_storage_clucene_termdocs_stream_data*)context;
+public:
+  TermDocsStream(TermDocs* termDocs, librdf_world* world, librdf_statement* statement, librdf_node* context_node, bool is_literal_match):
+    CommonStream(world, statement, context_node, is_literal_match)
+  {
+    this->termDocs = termDocs;
 
-  _CLDECDELETE(stream->term);
-  _CLDELETE(stream->termDocs);
-  librdf_storage_clucene_common_stream_free(&stream->common);
-  free(stream);
-}
-static int
-librdf_storage_clucene_termdocs_stream_is_end(void* context){
-  librdf_storage_clucene_termdocs_stream_data* stream=(librdf_storage_clucene_termdocs_stream_data*)context;
+    strcpy(this->textBuffer, CLuceneStorageImpl::documentNumberUri.c_str());
+    assert ( CLuceneStorageImpl::documentNumberUri.length() == CLuceneStorageImpl::documentNumberUriSize );
+  }
+  ~TermDocsStream(){
+    _CLDELETE(this->termDocs);
+  }
+  bool is_end(){
+    return this->termDocs == NULL;
+  }
+  bool goto_next(){
+    if ( termDocs->next() ){
 
-  return stream->termDocs == NULL  < 0 ? 1 : 0;
-}
-static int
-librdf_storage_clucene_termdocs_stream_goto_next(void* context){
-  librdf_storage_clucene_termdocs_stream_data* stream=(librdf_storage_clucene_termdocs_stream_data*)context;
+      /* Make sure we have a statement object to return */
+      if(!current_statement) {
+        if(!(current_statement=librdf_new_statement(this->world)))
+          return false;
+      }else{
+        librdf_statement_clear(current_statement);
+      }
 
-  if ( stream->termDocs->next() ){
+      //fill in the resource
+      sprintf(this->textBuffer + CLuceneStorageImpl::documentNumberUriSize, "%d", this->termDocs->doc());
+      librdf_statement_set_subject(this->current_statement,
+        librdf_new_node_from_uri_string(this->world,
+        (const unsigned char*)this->textBuffer));
 
-    /* Make sure we have a statement object to return */
-    if(!stream->common.current_statement) {
-      if(!(stream->common.current_statement=librdf_new_statement(stream->common.storage->world)))
-        return 1;
-    }else{
-      librdf_statement_clear(stream->common.current_statement);
+      return CommonStream::goto_next();
+    }else {
+      if(this->current_statement)
+        librdf_free_statement(this->current_statement);
+      this->current_statement=NULL;
+
+      if(this->current_context)
+        librdf_free_node(this->current_context);
+
+      this->current_context=NULL;
+
+      _CLDELETE( this->termDocs );
+      return false;
     }
-
-    //fill in the resource
-    sprintf(stream->textBuffer + CLuceneStorageImpl::documentNumberUriSize, "%d", stream->termDocs->doc());
-    librdf_statement_set_subject(stream->common.current_statement,
-      librdf_new_node_from_uri_string(stream->common.storage->world,
-      (const unsigned char*)stream->textBuffer));
-
-    return librdf_storage_clucene_common_stream_goto_next(&stream->common);
-  }else {
-    if(stream->common.current_statement)
-      librdf_free_statement(stream->common.current_statement);
-    stream->common.current_statement=NULL;
-
-    if(stream->common.current_context)
-      librdf_free_node(stream->common.current_context);
-
-    stream->common.current_context=NULL;
-
-    _CLDELETE( stream->termDocs );
-    return 1;
   }
-
-}
-
-static void*
-librdf_storage_clucene_termdocs_stream_get_statement(void* context, int flags)
-{
-  librdf_storage_clucene_termdocs_stream_data* stream=(librdf_storage_clucene_termdocs_stream_data*)context;
-
-  switch(flags) {
-    case LIBRDF_ITERATOR_GET_METHOD_GET_OBJECT:
-
-/*
-  printf("===========RETURNING==========\n");
-if ( librdf_statement_get_subject(stream->common.current_statement) )
-  printf("subject=%s\n", (char*)librdf_node_to_string(librdf_statement_get_subject(stream->common.current_statement)));
-if ( librdf_statement_get_predicate(stream->common.current_statement) )
-  printf("predicate=%s\n", (char*)librdf_node_to_string(librdf_statement_get_predicate(stream->common.current_statement)));
-if ( librdf_statement_get_object(stream->common.current_statement) )
-  printf("object=%s\n", (char*)librdf_node_to_string(librdf_statement_get_object(stream->common.current_statement)));
-*/
-      return stream->common.current_statement;
-    case LIBRDF_ITERATOR_GET_METHOD_GET_CONTEXT:
-      assert(false);
-    default:
-      abort();
-  }
-}
-
-// ================ Single Doc stream ============
-typedef struct{
-  string* buffer;
-  librdf_storage_clucene_common_stream_data common;
-} librdf_storage_clucene_singledoc_stream_data;
-
-static void
-librdf_storage_clucene_singledoc_stream_init(librdf_storage_clucene_singledoc_stream_data* data, CLuceneStorageImpl* storage,  bool is_literal_match){
-    librdf_storage_clucene_common_stream_init(&data->common, storage, is_literal_match);
-    data->buffer = new string;
-}
-static void
-librdf_storage_clucene_singledoc_stream_free(void* context){
-  librdf_storage_clucene_singledoc_stream_data* stream=(librdf_storage_clucene_singledoc_stream_data*)context;
-  librdf_storage_clucene_common_stream_free(&stream->common);
-  delete stream->buffer;
-  free(stream);
-}
-static int
-librdf_storage_clucene_singledoc_stream_is_end(void* context){
-  librdf_storage_clucene_singledoc_stream_data* stream=(librdf_storage_clucene_singledoc_stream_data*)context;
-
-  return stream->buffer->empty() ? 1 : 0;
-}
-static int
-librdf_storage_clucene_singledoc_stream_goto_next(void* context){
-  librdf_storage_clucene_singledoc_stream_data* stream=(librdf_storage_clucene_singledoc_stream_data*)context;
-
-  //only one doc available...
-
-  /* Make sure we have a statement object to return */
-  if(!stream->common.current_statement) {
-    if(!(stream->common.current_statement=librdf_new_statement(stream->common.storage->world)))
-      return 1;
-  }else{
-    librdf_statement_clear(stream->common.current_statement);
-  }
-
-  //fill in the resource
-
-  librdf_statement_set_object(stream->common.current_statement,
-    librdf_new_node_from_literal(stream->common.storage->world,
-      (const unsigned char*)stream->buffer->c_str(), NULL,0));
-
-  int ret = librdf_storage_clucene_common_stream_goto_next(&stream->common);
-
-  return ret;
-}
-
-static void*
-librdf_storage_clucene_singledoc_stream_get_statement(void* context, int flags)
-{
-  librdf_storage_clucene_singledoc_stream_data* stream=(librdf_storage_clucene_singledoc_stream_data*)context;
-
-  switch(flags) {
-    case LIBRDF_ITERATOR_GET_METHOD_GET_OBJECT:
-/*
-  printf("===========RETURNING==========\n");
-if ( librdf_statement_get_subject(stream->common.current_statement) )
-  printf("subject=%s\n", (char*)librdf_node_to_string(librdf_statement_get_subject(stream->common.current_statement)));
-if ( librdf_statement_get_predicate(stream->common.current_statement) )
-  printf("predicate=%s\n", (char*)librdf_node_to_string(librdf_statement_get_predicate(stream->common.current_statement)));
-if ( librdf_statement_get_object(stream->common.current_statement) )
-  printf("object=%s\n", (char*)librdf_node_to_string(librdf_statement_get_object(stream->common.current_statement)));
-*/
-stream->buffer->clear();
-
-      return stream->common.current_statement;
-    case LIBRDF_ITERATOR_GET_METHOD_GET_CONTEXT:
-      assert(false);
-    default:
-      abort();
-  }
-}
+};
 
 // ================ CLuceneStorageImpl class ============
 
@@ -381,15 +236,10 @@ const std::string CLuceneStorageImpl::documentNumberUri = "http://clucene.sf.net
 CLuceneStorageImpl::CLuceneStorageImpl(librdf_storage* storage, librdf_world* world_):
   Redland::Wrapper<librdf_storage>((redland_object_free*)librdf_free_storage, storage),
   directory(NULL),
-  world(world_),
-  reader(NULL)
+  reader(NULL),
+  world(world_)
 {
 }
-/*
-CLuceneStorageImpl::CLuceneStorageImpl(const CLuceneStorageImpl& clone)
-  Redland::Wrapper<librdf_storage>((redland_object_free*)librdf_free_storage, storage),
-{
-}*/
 const TCHAR* CLuceneStorageImpl::idFieldName(){
   return _T("http://freedesktop.org/standards/xesam/1.0/core#url");
 }
@@ -440,7 +290,7 @@ void CLuceneStorageImpl::ensureOpen(){
 int CLuceneStorageImpl::Close(){
   return 0;
 }
-int CLuceneStorageImpl::Open(librdf_model* model){
+int CLuceneStorageImpl::Open(librdf_model*){
   return 0;
 }
 
@@ -480,80 +330,66 @@ librdf_stream* CLuceneStorageImpl::FindStatementsWithOptions(
     printf("object=%s\n", NodeToString(object).c_str());
   printf("\n");
 
-  if (predicate && object && !subject){
-    //simple term query...
-    librdf_storage_clucene_termdocs_stream_data* streamData;
-    streamData = (librdf_storage_clucene_termdocs_stream_data*)malloc(sizeof(librdf_storage_clucene_termdocs_stream_data));
-    librdf_storage_clucene_termdocs_stream_init(streamData, this, is_literal_match );
-
-    if ( context_node )
-      streamData->common.query_context = librdf_new_node_from_node(context_node);
-    if ( statement )
-      streamData->common.query_statement = librdf_new_statement_from_statement(statement);
-
-    streamData->term = _CLNEW Term(
+  if (!subject && predicate && object ){
+    //? P O
+    Term* term = _CLNEW Term(
       NodeToKeyword(predicate).c_str(),
       NodeToKeyword(object).c_str() );
-    streamData->termDocs = reader->termDocs(streamData->term);
+    TermDocs* termDocs = reader->termDocs(term);
+    _CLDECDELETE(term);
 
-    strcpy(streamData->textBuffer, documentNumberUri.c_str());
-    assert ( documentNumberUri.length() == documentNumberUriSize );
+    //simple term query...
+    TermDocsStream* stream = new TermDocsStream(termDocs, world, statement, context_node, is_literal_match );
 
-    if ( librdf_storage_clucene_termdocs_stream_goto_next(streamData) == 0 ){
-      librdf_stream* stream= librdf_new_stream(this->world,(void*)streamData,
-        &librdf_storage_clucene_termdocs_stream_is_end,
-        &librdf_storage_clucene_termdocs_stream_goto_next,
-        &librdf_storage_clucene_termdocs_stream_get_statement,
-        &librdf_storage_clucene_termdocs_stream_free
-       );
-       return stream;
+    if ( stream->goto_next() ){
+      return stream->get_stream();
     }else{
-      librdf_storage_clucene_termdocs_stream_free(streamData);
+      delete stream;
     }
-  }else if (subject && predicate && !object){
+  }else if (subject && predicate ){ //with or without object...
+
+    //if we are looking the value of a field in an exact document...
     if ( librdf_node_is_resource(subject) ){
       librdf_uri* uri = librdf_node_get_uri (subject);
       assert(uri != NULL);
       const char* uristr = (const char*)librdf_uri_as_string(uri);
       assert(uristr != NULL);
-
       if ( strncmp(uristr, CLuceneStorageImpl::documentNumberUri.c_str(), CLuceneStorageImpl::documentNumberUri.length() ) == 0 ){
         //one document...
         int docNum = atoi(uristr+CLuceneStorageImpl::documentNumberUri.length());
         if ( docNum >= 0 && docNum < reader->maxDoc() && !reader->isDeleted(docNum) ){
           //single document...
-          librdf_storage_clucene_singledoc_stream_data* streamData;
-          streamData = (librdf_storage_clucene_singledoc_stream_data*)malloc(sizeof(librdf_storage_clucene_singledoc_stream_data));
-          librdf_storage_clucene_singledoc_stream_init(streamData, this, is_literal_match );
-
-          if ( context_node )
-            streamData->common.query_context = librdf_new_node_from_node(context_node);
-          if ( statement )
-            streamData->common.query_statement = librdf_new_statement_from_statement(statement);
-
           Document* doc = reader->document(docNum);//todo: use field selector when upgrade
-          wstring field = doc->get( NodeToKeyword(predicate).c_str() );
-          streamData->buffer->assign(StringToChar(field));
-          _CLDELETE(doc);
+          const TCHAR* wfield = doc->get( NodeToKeyword(predicate).c_str() );
+          if ( wfield != NULL ){
+            //S P ?
+            string field = StringToChar(wfield);
+            if ( object == NULL ){
+              librdf_statement* the_statement = librdf_new_statement_from_statement(statement);
+              librdf_statement_set_object(the_statement,
+                librdf_new_node_from_literal(this->world,
+                  (const unsigned char*)field.c_str(), NULL,0));
 
-          //go to first...
-          librdf_storage_clucene_singledoc_stream_goto_next(streamData);
+              SingleStatementStream* stream = new SingleStatementStream(the_statement, world);
 
-          librdf_stream* stream= librdf_new_stream(this->world,(void*)streamData,
-            &librdf_storage_clucene_singledoc_stream_is_end,
-            &librdf_storage_clucene_singledoc_stream_goto_next,
-            &librdf_storage_clucene_singledoc_stream_get_statement,
-            &librdf_storage_clucene_singledoc_stream_free
-           );
-           return stream;
+              _CLDELETE(doc);
+              return stream->get_stream();
+            }else{
+              //S P O
+              string object_value = NodeToString(object);
+printf( "strcmp(%s,%s)==%d\n", field.c_str(), object_value.c_str(), field.compare(object_value));
+              if ( field.compare(object_value) == 0 ){
+                librdf_statement* the_statement = librdf_new_statement_from_statement(statement);
+                SingleStatementStream* stream = new SingleStatementStream(the_statement, world);
+                return stream->get_stream();
+              }
+            }
+          }
         }
-        return librdf_new_empty_stream(this->world);
       }
     }
-
-  }else{
-    assert(false);
   }
+  assert(false);
   return librdf_new_empty_stream(this->world);
 }
 

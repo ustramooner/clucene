@@ -109,7 +109,7 @@ int main(int argc, char * argv[])
   cout << "Model has " << model.size() << " triples" << endl;
 
   const unsigned char* query_string = (const unsigned char*) "select ?nick, ?name where "
-      "(?x rdf:type foaf:Person) (?x foaf:nick ?nick) (?x foaf:name ?name)"
+      "(?x rdf:type foaf:Person) (?x foaf:nick ?nick) (?x foaf:name ?name) (?x foaf:name \"Eric Miller\")"
       "using foaf for <http://xmlns.com/foaf/0.1/>";
   //const unsigned char* query_string = (const unsigned char*)argv[1];
   //const unsigned char* query_string = (const unsigned char*)"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX iemsr: <http://www.ukoln.ac.uk/projects/iemsr/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT $number $name $description WHERE {   $r rdf:type iemsr:RootDataElement .   $n iemsr:isChildOf $r .   $n iemsr:refNumber $number .   $n rdfs:label $name .   $n rdfs:comment $description }";

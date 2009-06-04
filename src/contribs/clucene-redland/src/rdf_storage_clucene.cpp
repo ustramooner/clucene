@@ -58,7 +58,7 @@ librdf_storage_clucene_shutdown(){
 }
 
 /** Local entry point for dynamically loaded storage module */
-static void
+void
 librdf_storage_clucene_register_factory(librdf_storage_factory *factory)
 {
   assert(!strcmp(factory->name, "clucene"));
@@ -71,14 +71,14 @@ librdf_storage_clucene_register_factory(librdf_storage_factory *factory)
   factory->close                           = librdf_storage_clucene_close;
   factory->size                            = librdf_storage_clucene_size;
 
-  factory->contains_statement              = librdf_storage_clucene_contains_statement;
-  factory->serialise                       = librdf_storage_clucene_serialise;
+  //factory->serialise                       = librdf_storage_clucene_serialise;
 
   factory->find_statements                 = librdf_storage_clucene_find_statements;
   factory->find_statements_in_context      = librdf_storage_clucene_find_statements_in_context;
   factory->find_statements_with_options    = librdf_storage_clucene_find_statements_with_options;
   //factory->find_sources                    = librdf_storage_clucene_find_sources;
-  //factory->find_arcs                       = librdf_storage_clucene_find_arcs;
+  factory->find_arcs                       = librdf_storage_clucene_find_arcs;
+  factory->contains_statement              = librdf_storage_clucene_contains_statement;
   //factory->find_arcs_in                    = librdf_storage_clucene_find_arcs_in;
   //factory->find_arcs_out                   = librdf_storage_clucene_find_arcs_out;
   //factory->has_arc_in                      = librdf_storage_clucene_has_arcs_out;
@@ -101,7 +101,7 @@ typedef struct
 
 
 //initialise the storage...
-static int librdf_storage_clucene_init(librdf_storage* storage, const char *name, librdf_hash* options){
+int librdf_storage_clucene_init(librdf_storage* storage, const char *name, librdf_hash* options){
   //create the instance data...
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)calloc(1, sizeof(librdf_storage_clucene_instance));
   //and assign it to the storage
@@ -115,14 +115,14 @@ static int librdf_storage_clucene_init(librdf_storage* storage, const char *name
   context->instance->Init(_name,options);
   return 0;
 }
-static void librdf_storage_clucene_terminate(librdf_storage* storage){
+void librdf_storage_clucene_terminate(librdf_storage* storage){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
 
   delete context->instance;
 
   LIBRDF_FREE(librdf_storage_clucene_instance, context);
 }
-static int librdf_storage_clucene_clone(librdf_storage* new_storage, librdf_storage* old_storage){
+int librdf_storage_clucene_clone(librdf_storage* new_storage, librdf_storage* old_storage){
   assert(false);
   librdf_storage_clucene_instance* old_context=(librdf_storage_clucene_instance*)old_storage->instance;
 
@@ -134,48 +134,73 @@ static int librdf_storage_clucene_clone(librdf_storage* new_storage, librdf_stor
   //and clone the c++ object.
   newcontext->instance = new Redland::CLuceneStorageImpl(*old_context->instance);
 }
-static int librdf_storage_clucene_open(librdf_storage* storage, librdf_model* model){
+int librdf_storage_clucene_open(librdf_storage* storage, librdf_model* model){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
   return context->instance->Open(model);
 }
-static int librdf_storage_clucene_close(librdf_storage* storage){
+int librdf_storage_clucene_close(librdf_storage* storage){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
   return context->instance->Close();
 }
-static int librdf_storage_clucene_size(librdf_storage* storage){
+int librdf_storage_clucene_size(librdf_storage* storage){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
   return context->instance->Size();
 }
-static int librdf_storage_clucene_contains_statement(librdf_storage* storage, librdf_statement* statement){
-  assert(false);
-  librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
-  return 0; //TODO:
-}
-static librdf_stream* librdf_storage_clucene_serialise(librdf_storage* storage){
-  assert(false);
-  librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
-  return NULL; //TODO:
-}
-static librdf_stream* librdf_storage_clucene_find_statements_with_options(librdf_storage* storage, librdf_statement* statement,
+librdf_stream* librdf_storage_clucene_find_statements_with_options(librdf_storage* storage, librdf_statement* statement,
                                                   librdf_node* context_node,
                                                   librdf_hash* options){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
   return context->instance->FindStatementsWithOptions(statement, context_node, options);
 }
-static librdf_iterator* librdf_storage_clucene_find_sources(librdf_storage* storage, librdf_node* arc, librdf_node *target){
+int librdf_storage_clucene_contains_statement(librdf_storage* storage, librdf_statement* statement){
+  assert(false);
+  librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
+  return 0; //TODO:
+}
+/*librdf_iterator* librdf_storage_clucene_find_sources(librdf_storage* storage, librdf_node* arc, librdf_node *target){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
   assert(false);
   return NULL; //TODO:
 }
-static librdf_iterator* librdf_storage_clucene_find_arcs(librdf_storage* storage, librdf_node* source, librdf_node *target){
+librdf_iterator* librdf_storage_clucene_find_targets(librdf_storage* storage, librdf_node* source, librdf_node *arc){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
   assert(false);
   return NULL; //TODO:
 }
-static librdf_iterator* librdf_storage_clucene_find_targets(librdf_storage* storage, librdf_node* source, librdf_node *arc){
+librdf_stream* librdf_storage_clucene_serialise(librdf_storage* storage){
+  assert(false);
+  librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
+  return NULL; //TODO:
+}*/
+librdf_iterator* librdf_storage_clucene_find_arcs(librdf_storage* storage, librdf_node* source, librdf_node *target){
   librdf_storage_clucene_instance* context=(librdf_storage_clucene_instance*)storage->instance;
   assert(false);
   return NULL; //TODO:
+}
+
+
+
+//==============Stream wrapper===============
+void
+librdf_storage_clucene_stream_free(void* context){
+  Redland::CLuceneStream* stream=(Redland::CLuceneStream*)context;
+  delete stream;
+}
+int
+librdf_storage_clucene_stream_is_end(void* context){
+  Redland::CLuceneStream* stream=(Redland::CLuceneStream*)context;
+  return stream->is_end() ? 1 : 0;
+}
+int
+librdf_storage_clucene_stream_goto_next(void* context){
+  Redland::CLuceneStream* stream=(Redland::CLuceneStream*)context;
+  return stream->goto_next() ? 1 : 0;
+}
+void*
+librdf_storage_clucene_stream_get_statement(void* context, int flags)
+{
+  Redland::CLuceneStream* stream=(Redland::CLuceneStream*)context;
+  return stream->get_statement(flags);
 }
 
 
@@ -183,13 +208,13 @@ static librdf_iterator* librdf_storage_clucene_find_targets(librdf_storage* stor
 
 //==============ALIASES===============
 
-static librdf_stream*
+librdf_stream*
 librdf_storage_clucene_find_statements(librdf_storage* storage,
                                      librdf_statement* statement)
 {
   return librdf_storage_clucene_find_statements_in_context(storage,statement,NULL);
 }
-static librdf_stream*
+librdf_stream*
 librdf_storage_clucene_find_statements_in_context(librdf_storage* storage, librdf_statement* statement,
                          librdf_node* context_node)
 {

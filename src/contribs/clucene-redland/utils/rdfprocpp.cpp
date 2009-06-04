@@ -114,7 +114,9 @@ int main(int argc, char * argv[])
   //const unsigned char* query_string = (const unsigned char*)argv[1];
   //const unsigned char* query_string = (const unsigned char*)"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX iemsr: <http://www.ukoln.ac.uk/projects/iemsr/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT $number $name $description WHERE {   $r rdf:type iemsr:RootDataElement .   $n iemsr:isChildOf $r .   $n iemsr:refNumber $number .   $n rdfs:label $name .   $n rdfs:comment $description }";
   //const unsigned char* query_string = (const unsigned char*)"PREFIX : <http://www.commonobjects.example.org/gmlrss> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX foaf: <http://xmlns.com/foaf/0.1/>  SELECT ?name ?birthDate ?deathDate WHERE { ?bridge a :Bridge; foaf:maker ?person [ foaf:name ?name; bio:event [ a bio:Birth; bio:date ?birthDate ]; bio:event [ a bio:Death; bio:date ?deathDate ] ] }";
-  const unsigned char* query_string = (const unsigned char*)"PREFIX fd: <http://freedesktop.org/standards/xesam/1.0/core#> PREFIX strigi: <http://strigi.sf.net/ontologies/0.9#> SELECT ?url, ?depth WHERE { ?x fd:fileExtension \"pdf\" .?x strigi:depth \"2\" . ?x fd:url ?url . ?x strigi:depth ?depth }";
+  const unsigned char* query_string = (const unsigned char*)"PREFIX fd: <http://freedesktop.org/standards/xesam/1.0/core#> PREFIX strigi: <http://strigi.sf.net/ontologies/0.9#> SELECT ?url, ?depth WHERE { ?x fd:fileExtension \"pdf\" . ?x fd:url ?url . ?x strigi:depth ?depth  .?x strigi:depth \"2\" }";
+
+
   librdf_query* query = librdf_new_query(world.cobj(), "sparql", NULL, query_string, NULL);
 
   librdf_query_results* results=librdf_model_query_execute(model.cobj(), query);

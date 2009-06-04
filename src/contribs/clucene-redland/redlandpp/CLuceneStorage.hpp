@@ -31,35 +31,40 @@
 #include <redland.h>
 #include <CLucene.h>
 #include "redlandpp/Wrapper.hpp"
+#include "redlandpp/rdf_storage_clucene.h"
 
 
-//the only 2 functions you should need...
 void librdf_storage_clucene_initialise(librdf_world* world);
 void librdf_storage_clucene_shutdown();
+void librdf_storage_clucene_register_factory(librdf_storage_factory *factory);
 
-/* prototypes for local functions */
-static int librdf_storage_clucene_init(librdf_storage* storage, const char *name, librdf_hash* options);
-static void librdf_storage_clucene_terminate(librdf_storage* storage);
-static int librdf_storage_clucene_clone(librdf_storage* new_storage, librdf_storage* old_storage);
-static int librdf_storage_clucene_open(librdf_storage* storage, librdf_model* model);
-static int librdf_storage_clucene_close(librdf_storage* storage);
-static int librdf_storage_clucene_size(librdf_storage* storage);
-static int librdf_storage_clucene_contains_statement(librdf_storage* storage, librdf_statement* statement);
-static librdf_stream* librdf_storage_clucene_serialise(librdf_storage* storage);
-static librdf_stream* librdf_storage_clucene_find_statements(librdf_storage* storage, librdf_statement* statement);
-static librdf_stream* librdf_storage_clucene_find_statements_in_context(librdf_storage* storage, librdf_statement* statement,
-  librdf_node* context_node);
-static librdf_stream* librdf_storage_clucene_find_statements_with_options(librdf_storage* storage, librdf_statement* statement,
-  librdf_node* context_node,
-  librdf_hash* options);
-static librdf_iterator* librdf_storage_clucene_find_sources(librdf_storage* storage, librdf_node* arc, librdf_node *target);
-static librdf_iterator* librdf_storage_clucene_find_arcs(librdf_storage* storage, librdf_node* source, librdf_node *target);
-static librdf_iterator* librdf_storage_clucene_find_targets(librdf_storage* storage, librdf_node* source, librdf_node *arc);
-static void librdf_storage_clucene_register_factory(librdf_storage_factory *factory);
-
+void librdf_storage_clucene_stream_free(void* context);
+int librdf_storage_clucene_stream_is_end(void* context);
+int librdf_storage_clucene_stream_goto_next(void* context);
+void* librdf_storage_clucene_stream_get_statement(void* context, int flags);
 
 namespace Redland {
 
+  class CLuceneStream {
+  public:
+    librdf_world* world;
+    CLuceneStream(librdf_world* world){
+      this->world = world;
+    }
+    virtual ~CLuceneStream(){}
+    virtual bool is_end() = 0;
+    virtual bool goto_next() = 0;
+    virtual librdf_statement* get_statement(int flags) = 0;
+
+    librdf_stream* get_stream(){
+      return librdf_new_stream(this->world,this,
+        &librdf_storage_clucene_stream_is_end,
+        &librdf_storage_clucene_stream_goto_next,
+        &librdf_storage_clucene_stream_get_statement,
+        &librdf_storage_clucene_stream_free
+       );
+    }
+  };
 
   class CLuceneStorageImpl : public Wrapper<librdf_storage> {
     lucene::store::Directory* directory;
