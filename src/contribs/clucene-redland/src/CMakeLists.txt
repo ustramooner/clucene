@@ -5,10 +5,11 @@ project(clucene-redland-core)
 include_directories(
   ${clucene-redland_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
-  "/home/ben/dev/clucene-rdf/redland-1.0.9/src/"
-  "/home/ben/dev/clucene-rdf/redland-1.0.9/gcc/install/include/"
-  "/usr/include/rasqal"
-  "/usr/lib"
+  ${CLUCENE_INCLUDE_DIR}
+  ${CLUCENE_LIBRARY_DIR}
+  ${REDLAND_INCLUDE_DIR}
+  ${RASQAL_INCLUDE_DIR}
+  ${RAPTOR_INCLUDE_DIR}
 )
 
 set( CLUCNENE_REDLAND_CORE_SRCS

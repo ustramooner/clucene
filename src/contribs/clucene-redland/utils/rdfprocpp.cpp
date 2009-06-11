@@ -27,101 +27,52 @@
 #include <vector>
 
 #include "redlandpp/rdf_storage_clucene.h"
-#include "redlandpp/Storage.hpp"
-#include "redlandpp/Model.hpp"
 
 using namespace std;
 
-using namespace Redland;
-
-
 int main(int argc, char * argv[])
 {
-  if ( argc < 2 ){
-      fprintf(stderr, "Usage: %s query\n", argv[0]);
-      //return -1;
-  }
+  char *program=argv[0];
+  librdf_world* world;
+  librdf_storage *storage;
+  librdf_model* model;
+  const char *parser_name;
+  librdf_query* query;
+  librdf_query_results* results;
+  const unsigned char *query_string=NULL;
 
-  World world;
-  librdf_storage_clucene_initialise(world.cobj());
-
-  cout << "Initialised " << world << endl;
-
-  Storage storage(world, "clucene", "", "dir='/home/ben/dev/svn_strigi/testindex'");
-  //MemoryStorage storage(world);
-
-  Model model(world, storage);
-
-  cout << "Redland is " + world.shortCopyrightString() << endl;
+  world=librdf_new_world();
+  librdf_world_open(world);
+  librdf_storage_clucene_initialise(world);
 
 /*
-  Uri uri(&world, "file:///home/ben/dev/clucene-rdf/foaf.rdf");
-
-  cout << "URI is " << uri << endl;
-
-#if 0
-  std::vector<RaptorParserDescription> v=r.getParserDescriptions();
-  for (unsigned int i = 0; i < v.size(); i++ ) {
-    cout << "Parser " << i << endl << v[i] << endl;
+  if(argc !=3) {
+    fprintf(stderr, "USAGE: %s CLUCENE-INDEX SPARQL-QUERY-STRING\n", program);
+    //return 1;
   }
 
-  if (r.isParserName("rdfxml")) {
-    cout << "rdfxml IS a parser name\n";
-  }
+  query_string=(const unsigned char*)argv[2];
 
-  if (!r.isParserName("foobar")) {
-    cout << "foobar IS NOT a parser name\n";
-  }
-#endif
-
-  Parser parser(&world, string("rdfxml"));
-
-  cout << "Parser is " << parser << endl;
-
-#if 1
-  try {
-    Stream* s = parser.parseUri(&uri, NULL);
-    while(true) {
-      Statement* st=s->get();
-      if(st == NULL)
-        break;
-      cout << "Triple " << st << endl;
-      s->next();
-      delete st;
-    }
-    delete s;
-  }
-  catch (Exception &e) {
-    cerr << "parseUri(" << uri << ") failed with exception " << e.what() << endl;
-  }
-#endif
-
-  try {
-    Stream* s=parser.parseUri(&uri, NULL);
-    model.add(s);
-    delete s;
-  }
-  catch (Exception &e) {
-    cerr << "parseUri(" << uri << ") failed with exception " << e.what() << endl;
-  }
-
-  cout << "Model has " << model.size() << " triples" << endl;
+  string dir = "dir='";
+  dir += argv[1];
+  dir += "'";
 */
-
-  /*const unsigned char* query_string = (const unsigned char*) "select ?nick, ?name where "
-      "(?x rdf:type foaf:Person) (?x foaf:nick ?nick) (?x foaf:name ?name)"
-      "using foaf for <http://xmlns.com/foaf/0.1/>";*/
-  //const unsigned char* query_string = (const unsigned char*)argv[1];
-  //const unsigned char* query_string = (const unsigned char*)"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX iemsr: <http://www.ukoln.ac.uk/projects/iemsr/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT $number $name $description WHERE {   $r rdf:type iemsr:RootDataElement .   $n iemsr:isChildOf $r .   $n iemsr:refNumber $number .   $n rdfs:label $name .   $n rdfs:comment $description }";
-  //const unsigned char* query_string = (const unsigned char*)"PREFIX : <http://www.commonobjects.example.org/gmlrss> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX foaf: <http://xmlns.com/foaf/0.1/>  SELECT ?name ?birthDate ?deathDate WHERE { ?bridge a :Bridge; foaf:maker ?person [ foaf:name ?name; bio:event [ a bio:Birth; bio:date ?birthDate ]; bio:event [ a bio:Death; bio:date ?deathDate ] ] }";
-  const unsigned char* query_string = (const unsigned char*)"PREFIX fd: <http://freedesktop.org/standards/xesam/1.0/core#> PREFIX strigi: <http://strigi.sf.net/ontologies/0.9#> SELECT ?url, ?depth WHERE { ?x fd:fileExtension \"pdf\" . ?x fd:url ?url . ?x strigi:depth ?depth  .?x strigi:depth \"2\" }";
+  query_string = (const unsigned char*)"PREFIX www: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX fdo: <http://www.semanticdesktop.org/ontologies/2007/01/19/nie#> PREFIX fd: <http://freedesktop.org/standards/xesam/1.0/core#> PREFIX strigi: <http://strigi.sf.net/ontologies/0.9#> SELECT ?url, ?xB WHERE { ?x fd:fileExtension \"pdf\" . ?x fd:url ?url . ?x fdo:isPartOf ?parent . ?y fd:url ?parent . ?y www:type ?xB }";
+  string dir = "dir='/home/ben/dev/svn_strigi/testindex/'";
 
 
-  librdf_query* query = librdf_new_query(world.cobj(), "sparql", NULL, query_string, NULL);
+  model=librdf_new_model(world, storage=librdf_new_storage(world, "clucene", "test", dir.c_str()), NULL);
+  if(!model || !storage) {
+    fprintf(stderr, "%s: Failed to make model or storage\n", program);
+    return 1;
+  }
 
-  librdf_query_results* results=librdf_model_query_execute(model.cobj(), query);
+  query=librdf_new_query(world, "sparql", NULL, query_string, NULL);
+
+  results=librdf_model_query_execute(model, query);
   if(!results) {
-    fprintf(stderr, "Query of model with '%s' failed\n", query_string);
+    fprintf(stderr, "%s: Query of model with '%s' failed\n",
+            program, query_string);
     return 1;
   }
 
@@ -152,11 +103,21 @@ int main(int argc, char * argv[])
     librdf_query_results_next(results);
   }
 
-  fprintf(stdout, "Query returned %d results\n", librdf_query_results_get_count(results));
+  fprintf(stdout, "%s: Query returned %d results\n", program,
+          librdf_query_results_get_count(results));
 
   librdf_free_query_results(results);
   librdf_free_query(query);
 
+  librdf_free_model(model);
+  librdf_free_storage(storage);
 
-  return 0;
+  librdf_free_world(world);
+
+#ifdef LIBRDF_MEMORY_DEBUG
+  librdf_memory_report(stderr);
+#endif
+
+  /* keep gcc -Wall happy */
+  return(0);
 }

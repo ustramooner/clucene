@@ -2,6 +2,8 @@ project(clucene-redland)
 
 cmake_minimum_required(VERSION 2.6.2)
 INCLUDE ( CheckIncludeFileCXX )
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake) 
+
 
 ##################  setup install directories  ################################
 set (LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)" )
@@ -22,6 +24,13 @@ if(APPLE)
    set(CMAKE_INSTALL_NAME_DIR ${LIB_DESTINATION})
 endif(APPLE)
 
+
+##################  find packages  ################################
+
+find_package(Rasqal)
+find_package(Raptor)
+find_package(Redland)
+find_package(CLucene)
 
 ##################  some compiler settings ################################
 if(CMAKE_COMPILER_IS_GNUCXX AND NOT WIN32 )

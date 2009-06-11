@@ -29,9 +29,13 @@
 #include <iostream>
 #include <redland.h>
 #include <rdf_storage.h>
-#include <rdf_storage_module.h>
 #include "redlandpp/Wrapper.hpp"
 #include "redlandpp/CLuceneStorage.hpp"
+
+#ifndef LIBRDF_INTERNAL
+  #define LIBRDF_ITERATOR_GET_METHOD_GET_OBJECT  0
+  #define LIBRDF_ITERATOR_GET_METHOD_GET_CONTEXT 1
+#endif
 
 namespace Redland {
 
@@ -156,16 +160,6 @@ public:
   {
     switch(flags) {
       case LIBRDF_ITERATOR_GET_METHOD_GET_OBJECT:
-
-  /*
-    printf("===========RETURNING==========\n");
-  if ( librdf_statement_get_subject(stream->common.current_statement) )
-    printf("subject=%s\n", (char*)librdf_node_to_string(librdf_statement_get_subject(stream->common.current_statement)));
-  if ( librdf_statement_get_predicate(stream->common.current_statement) )
-    printf("predicate=%s\n", (char*)librdf_node_to_string(librdf_statement_get_predicate(stream->common.current_statement)));
-  if ( librdf_statement_get_object(stream->common.current_statement) )
-    printf("object=%s\n", (char*)librdf_node_to_string(librdf_statement_get_object(stream->common.current_statement)));
-  */
         return this->current_statement;
       case LIBRDF_ITERATOR_GET_METHOD_GET_CONTEXT:
         assert(false);
@@ -282,6 +276,7 @@ CLuceneStorageImpl::~CLuceneStorageImpl()
 }
 
 void CLuceneStorageImpl::ensureOpen(){
+  assert(directory != NULL);
   if ( reader == NULL ){
     reader = IndexReader::open(directory);
   }
@@ -301,10 +296,7 @@ int CLuceneStorageImpl::Size(){
   return reader->numDocs();
 }
 
-librdf_stream* CLuceneStorageImpl::FindStatementsWithOptions(
-  librdf_statement* statement,
-  librdf_node* context_node,
-  librdf_hash* options){
+librdf_stream* CLuceneStorageImpl::FindStatements(librdf_statement* statement){
   ensureOpen();
 
   librdf_node *subject, *predicate, *object;
@@ -312,23 +304,14 @@ librdf_stream* CLuceneStorageImpl::FindStatementsWithOptions(
   string where;
   string joins;
 
-  if ( options )
-    is_literal_match = librdf_hash_get_as_boolean(options, "match-substring");
+  //if ( options )
+  //  is_literal_match = librdf_hash_get_as_boolean(options, "match-substring");
 
   if(statement) {
     subject=librdf_statement_get_subject(statement);
     predicate=librdf_statement_get_predicate(statement);
     object=librdf_statement_get_object(statement);
   }
-
-  printf("===========FindStatementsWithOptions==========\n");
-  if ( subject )
-    printf("subject=%s\n", NodeToString(subject).c_str());
-  if ( predicate )
-    printf("predicate=%s\n", NodeToString(predicate).c_str());
-  if ( object )
-    printf("object=%s\n", NodeToString(object).c_str());
-  printf("\n");
 
   if (!subject && predicate && object ){
     //? P O
@@ -339,7 +322,7 @@ librdf_stream* CLuceneStorageImpl::FindStatementsWithOptions(
     _CLDECDELETE(term);
 
     //simple term query...
-    TermDocsStream* stream = new TermDocsStream(termDocs, world, statement, context_node, is_literal_match );
+    TermDocsStream* stream = new TermDocsStream(termDocs, world, statement, NULL, is_literal_match );
 
     if ( stream->goto_next() ){
       return stream->get_stream();
@@ -377,7 +360,6 @@ librdf_stream* CLuceneStorageImpl::FindStatementsWithOptions(
             }else{
               //S P O
               string object_value = NodeToString(object);
-printf( "strcmp(%s,%s)==%d\n", field.c_str(), object_value.c_str(), field.compare(object_value));
               if ( field.compare(object_value) == 0 ){
                 librdf_statement* the_statement = librdf_new_statement_from_statement(statement);
                 SingleStatementStream* stream = new SingleStatementStream(the_statement, world);
@@ -389,7 +371,7 @@ printf( "strcmp(%s,%s)==%d\n", field.c_str(), object_value.c_str(), field.compar
       }
     }
   }
-  assert(false);
+  assert(false); //not all paths are implemented yet
   return librdf_new_empty_stream(this->world);
 }
 
