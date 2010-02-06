@@ -34,6 +34,7 @@
 #include "queryParser/TestMultiFieldQueryParser.cpp"
 #include "search/TestBoolean.cpp"
 #include "search/TestSearch.cpp"
+#include "search/TestBoolean.cpp"
 #include "search/TestSort.cpp"
 #include "search/TestBoolean.cpp"
 #include "search/TestRangeFilter.cpp"

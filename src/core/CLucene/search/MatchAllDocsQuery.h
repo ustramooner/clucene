@@ -11,8 +11,8 @@
 #include "SearchHeader.h"
 #include "Query.h"
 
-CL_CLASS_DEF(index,Explanation)
-CL_CLASS_DEF(index,Similarity)
+CL_CLASS_DEF(search,Explanation)
+CL_CLASS_DEF(search,Similarity)
 CL_CLASS_DEF(index,IndexReader)
 
 CL_NS_DEF(search)
