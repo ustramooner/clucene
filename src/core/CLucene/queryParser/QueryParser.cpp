@@ -341,7 +341,7 @@ Query* QueryParser::getFieldQuery(const TCHAR* _field, TCHAR* queryText) {
   try {
     source->close();
   }
-  _CLCATCH_ERR(CL_ERR_IO, {_CLLDELETE(source);_CLLDELETE(t);_CLDELETE_LCARRAY(queryText);},/*ignore CL_ERR_IO */);
+  _CLCATCH_ERR_CLEANUP(CL_ERR_IO, {_CLLDELETE(source);_CLLDELETE(t);_CLDELETE_LCARRAY(queryText);} ); /* cleanup */
   _CLLDELETE(source);
 
   if (v.size() == 0)

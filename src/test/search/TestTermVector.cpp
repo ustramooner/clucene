@@ -72,7 +72,7 @@ void testTermVectors(CuTest *tc) {
     }
 }
 
-void testTVSetup(CuTest *tc) {
+void testTVSetup(CuTest* /*tc*/) {
     SimpleAnalyzer a;
     tv_directory = _CLNEW RAMDirectory();
     IndexWriter writer(tv_directory, &a, true);
@@ -101,7 +101,7 @@ void testTVSetup(CuTest *tc) {
     writer.close();
     tv_searcher = _CLNEW IndexSearcher(tv_directory);
 }
-void testTVCleanup(CuTest *tc) {
+void testTVCleanup(CuTest* /*tc*/) {
     _CLDELETE(tv_searcher);
     tv_directory->close();
     _CLDELETE(tv_directory);

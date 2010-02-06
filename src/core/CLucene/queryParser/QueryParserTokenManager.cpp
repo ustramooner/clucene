@@ -1149,7 +1149,7 @@ QueryToken* QueryParserTokenManager::getNextToken() {
 		{
 			curChar = input_stream->BeginToken();
 		}
-		_CLCATCH_ERR(CL_ERR_IO, /*cleanup code*/ , {
+		_CLCATCH_ERR_ELSE(CL_ERR_IO, { /*else*/
 			jjmatchedKind = 0;
 			matchedToken = jjFillToken();
 			return matchedToken;
@@ -1199,7 +1199,7 @@ QueryToken* QueryParserTokenManager::getNextToken() {
 		TCHAR* error_after = NULL;
 		bool EOFSeen = false;
 		try { input_stream->readChar(); input_stream->backup(1); }
-		_CLCATCH_ERR(CL_ERR_IO, /*cleanup code*/ , {
+		_CLCATCH_ERR_ELSE(CL_ERR_IO, { /*else*/
 			EOFSeen = true;
 			if (curPos <= 1) {
 				error_after = _CL_NEWARRAY(TCHAR,2);

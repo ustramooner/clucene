@@ -54,7 +54,7 @@
 		CuAssert(tc,_T("Index does not exist"), Misc::dir_Exists(loc));
 		s=_CLNEW IndexSearcher(loc);
   }
-	void testSrchCloseIndex(CuTest *tc ){
+	void testSrchCloseIndex(CuTest* /*tc*/ ){
 		if ( s!=NULL ){
 			s->close();
 			_CLDELETE(s);
@@ -355,7 +355,7 @@ void testNormEncoding(CuTest *tc) {
     CLUCENE_ASSERT( CL_NS(search)::Similarity::encodeNorm(CL_NS(search)::Similarity::decodeNorm(57)) == 57 );
 }
 
-void testSrchManyHits(CuTest *tc) {
+void testSrchManyHits(CuTest* /*tc*/) {
   SimpleAnalyzer analyzer;
 	RAMDirectory ram;
 	IndexWriter writer( &ram, &analyzer, true);

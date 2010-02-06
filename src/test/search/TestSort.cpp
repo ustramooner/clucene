@@ -69,7 +69,7 @@ Searcher* sort_getIndex (bool even, bool odd){
 	return res;
 }
 
-void testSortSetup(CuTest *tc) {
+void testSortSetup(CuTest* /*tc*/) {
     sort_full = sort_getIndex (true, true);
 	sort_searchX = sort_getIndex (true, false);
 	sort_searchY = sort_getIndex (false, true);
@@ -95,7 +95,7 @@ void testSortSetup(CuTest *tc) {
 	_sort   = _CLNEW Sort();
 }
 
-void testSortCleanup(CuTest *tc) {
+void testSortCleanup(CuTest* /*tc*/) {
     _CLDELETE(sort_full);
     _CLDELETE(sort_searchX);
     _CLDELETE(sort_searchY);

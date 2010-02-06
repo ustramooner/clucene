@@ -92,11 +92,6 @@ TCHAR* FastCharStream::GetSuffix(const int32_t len) {
 }
 
 void FastCharStream::Done() {
-	try {
-		//input->close();
-	} _CLCATCH_ERR(CL_ERR_IO, /*cleanup code*/, {
-		/*System.err.println("Caught: " + e + "; ignoring.");*/
-	})
 }
 
 TCHAR FastCharStream::BeginToken() {

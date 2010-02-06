@@ -89,7 +89,7 @@ void assertReaderClosed(CuTest* tc, IndexReader* reader, bool checkSubReaders, b
   }
 }
 
-void assertReaderOpen(CuTest* tc, IndexReader* reader) {
+void assertReaderOpen(CuTest* /*tc*/, IndexReader* reader) {
   Document doc;
   reader->document(0, doc);//hack to call ensureOpen...
 
@@ -102,7 +102,7 @@ void assertReaderOpen(CuTest* tc, IndexReader* reader) {
 }
 
 Directory* defaultModifyIndexTestDir1 = NULL;
-IndexReader* defaultModifyIndexTest(CuTest* tc, IndexReader* reader, int i){
+IndexReader* defaultModifyIndexTest(CuTest* /*tc*/, IndexReader* reader, int i){
   WhitespaceAnalyzer whitespaceAnalyzer;
   switch (i) {
     case 0: {

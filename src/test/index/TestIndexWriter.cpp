@@ -200,7 +200,7 @@ void testAddIndexes(CuTest *tc){
   }
 }
 
-void testHashingBug(CuTest *tc){
+void testHashingBug(CuTest* /*tc*/){
   //Manuel Freiholz's indexing bug
 
   CL_NS(document)::Document doc;
