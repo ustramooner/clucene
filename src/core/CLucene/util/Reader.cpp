@@ -244,7 +244,7 @@ FileInputStream::FileInputStream ( const char* path, int32_t buflen  )
 }
 
 size_t FileInputStream::size(){
-	return _internal->jsbuffer->size();
+	return (size_t)_internal->jsbuffer->size();
 }
 
 FileInputStream::~FileInputStream ()
@@ -418,7 +418,7 @@ int64_t SimpleInputStreamReader::skip(int64_t ntoskip){
 	return _internal->jsbuffer->skip(ntoskip);
 }
 size_t SimpleInputStreamReader::size(){
-	return _internal->jsbuffer->size();
+	return (size_t)_internal->jsbuffer->size();
 }
 void SimpleInputStreamReader::setMinBufSize(int32_t minbufsize){
 	_internal->jsbuffer->_setMinBufSize(minbufsize);
@@ -478,7 +478,7 @@ int64_t FilteredBufferedReader::skip(int64_t ntoskip){
 	return _internal->jsbuffer->skip(ntoskip);
 }
 size_t FilteredBufferedReader::size(){
-	return _internal->jsbuffer->size();
+	return (size_t)_internal->jsbuffer->size();
 }
 void FilteredBufferedReader::setMinBufSize(int32_t minbufsize){
 	return _internal->jsbuffer->_setMinBufSize(minbufsize);
@@ -541,7 +541,7 @@ int64_t FilteredBufferedInputStream::skip(int64_t ntoskip){
 	return _internal->jsbuffer->skip(ntoskip);
 }
 size_t FilteredBufferedInputStream::size(){
-	return _internal->jsbuffer->size();
+	return (size_t)_internal->jsbuffer->size();
 }
 void FilteredBufferedInputStream::setMinBufSize(int32_t minbufsize){
 	return _internal->jsbuffer->_setMinBufSize(minbufsize);

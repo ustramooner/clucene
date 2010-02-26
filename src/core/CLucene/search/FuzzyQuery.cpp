@@ -153,7 +153,7 @@ CL_NS_DEF(search)
 
 		const uint32_t maxDistance = getMaxDistance(m);
 
-		if (maxDistance < abs((int32_t)(m-n))) {
+		if ( maxDistance < (uint32_t)(abs((int32_t)(m-n))) ) {
 			//just adding the characters of m to n or vice-versa results in
 			//too many edits
 			//for example "pre" length is 3 and "prefixes" length is 8.  We can see that
