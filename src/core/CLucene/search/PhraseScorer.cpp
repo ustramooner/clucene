@@ -21,7 +21,7 @@ CL_NS_DEF(search)
 
 	PhraseScorer::PhraseScorer(Weight* _weight, TermPositions** tps, 
 		int32_t* offsets, Similarity* similarity, uint8_t* _norms):
-		Scorer(similarity), weight(_weight), norms(_norms), value(_weight->getValue()), firstTime(true), more(true),
+		Scorer(similarity), weight(_weight), norms(_norms), value(_weight->getValue()), firstTime(true), more(true), freq(0.0f),
 			first(NULL), last(NULL)
 	{
 	//Func - Constructor
