@@ -370,11 +370,11 @@ void testWildcard(CuTest *tc)
 	assertCorrectQuery(tc, _T("t*"), NULL,"PrefixQuery", _T("t*"));
 
 	FuzzyQuery* fq = (FuzzyQuery*)getQuery(tc,_T("term~0.7"), NULL);
-	CuAssertTrue(tc, 0.7 == fq->getMinSimilarity()/*, 0.1*/);
+	CuAssertTrue(tc, abs(0.7 - fq->getMinSimilarity()) < 0.1);
 	CuAssertTrue(tc, FuzzyQuery::defaultPrefixLength == fq->getPrefixLength());
 	_CLLDELETE(fq);
 	fq = (FuzzyQuery*)getQuery(tc, _T("term~"), NULL);
-	CuAssertTrue(tc, 0.5 == fq->getMinSimilarity()/*, 0.1*/);
+	CuAssertTrue(tc, abs(0.5 - fq->getMinSimilarity()) < 0.1);
 	CuAssertTrue(tc, FuzzyQuery::defaultPrefixLength == fq->getPrefixLength());
 	_CLDELETE(fq);
 
