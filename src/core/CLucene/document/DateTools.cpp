@@ -148,7 +148,7 @@ int64_t DateTools::stringToTime(const TCHAR* dateString) {
 				s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
 				tmpDate[4] = 0;
 				s_time.tm_year = _ttoi( tmpDate ) - 1900;
-				delete[] tmpDate;
+				_CLDELETE_CARRAY(tmpDate);
 				break;
 			}
 		default:
