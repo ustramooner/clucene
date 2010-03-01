@@ -37,12 +37,12 @@ public:
     /**
      * Equivalent to longToString(Long.MIN_VALUE); STR_SIZE is depandant on the length of it
      */
-	LUCENE_STATIC_CONSTANT(TCHAR*, MIN_STRING_VALUE);
+	static const TCHAR* MIN_STRING_VALUE;
 
 	/**
      * Equivalent to longToString(Long.MAX_VALUE)
      */
-	LUCENE_STATIC_CONSTANT(TCHAR*, MAX_STRING_VALUE);
+	static const TCHAR* MAX_STRING_VALUE;
 
 	/**
      * The length of (all) strings returned by {@link #longToString}
