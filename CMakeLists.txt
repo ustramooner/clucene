@@ -33,7 +33,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 #define options...
 
 Include (CLuceneDocs)
-Include (CLuceneBoost)
 Include (FindThreads)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -59,9 +58,20 @@ OPTION(ENABLE_DMALLOC
 OPTION(ENABLE_ASCII_MODE
   "enable ascii support"
   OFF)
+  
+SET(ENABLE_ANSI_MODE OFF)
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  SET(ENABLE_ANSI_MODE ON)
+  
+  #exceptions:
+  IF(MINGW OR CYGWIN)
+    SET(ENABLE_ANSI_MODE OFF)
+  ENDIF(MINGW OR CYGWIN)
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
 OPTION(ENABLE_ANSI_MODE
   "compile with -ansi flag"
-  ON)
+  ${ENABLE_ANSI_MODE})
 OPTION(LUCENE_USE_INTERNAL_CHAR_FUNCTIONS
   "use internal character functions. required to run tests correctly"
   ON)
@@ -135,6 +145,11 @@ INCLUDE_DIRECTORIES( ${clucene_SOURCE_DIR}/src/shared )
 INCLUDE_DIRECTORIES( ${clucene_BINARY_DIR}/src/shared )
 INCLUDE_DIRECTORIES( ${clucene_SOURCE_DIR}/src/core )
 
+#set boost path. we need src/ext to be defined before this works...
+Include (CLuceneBoost)
+GET_BOOST_INCLUDE_PATH(_CL_BOOST_INCLUDE_PATH)
+INCLUDE_DIRECTORIES( ${_CL_BOOST_INCLUDE_PATH} )
+
 #include the projects
 ADD_SUBDIRECTORY (src/ext)
 ADD_SUBDIRECTORY (src/shared)
@@ -148,6 +163,7 @@ ENDIF ( BUILD_CONTRIBS )
 IF ( BUILD_CONTRIBS_LIB )
   ADD_SUBDIRECTORY (src/contribs-lib EXCLUDE_FROM_ALL)
 ENDIF ( BUILD_CONTRIBS_LIB )
+
 
 #add uninstall command
 CONFIGURE_FILE(
