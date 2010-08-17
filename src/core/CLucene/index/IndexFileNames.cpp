@@ -33,7 +33,7 @@ CL_NS_DEF(index)
 	const char* IndexFileNames::PLAIN_NORMS_EXTENSION = "f";
 	const char* IndexFileNames::SEPARATE_NORMS_EXTENSION = "s";
 	const char* IndexFileNames::GEN_EXTENSION = "gen";
-
+  
 	const char* IndexFileNames_INDEX_EXTENSIONS_s[] =
 		{
 			IndexFileNames::COMPOUND_FILE_EXTENSION,
@@ -52,7 +52,15 @@ CL_NS_DEF(index)
 			IndexFileNames::NORMS_EXTENSION,
 			IndexFileNames::COMPOUND_FILE_STORE_EXTENSION
 		};
-	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::INDEX_EXTENSIONS(IndexFileNames_INDEX_EXTENSIONS_s, 15 );
+  
+	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::_INDEX_EXTENSIONS;
+  CL_NS(util)::ConstValueArray<const char*>& IndexFileNames::INDEX_EXTENSIONS(){
+    if ( _INDEX_EXTENSIONS.length == 0 ){
+      _INDEX_EXTENSIONS.values = IndexFileNames_INDEX_EXTENSIONS_s;
+      _INDEX_EXTENSIONS.length = 15;
+    }
+    return _INDEX_EXTENSIONS;
+  }
 
 	const char* IndexFileNames_INDEX_EXTENSIONS_IN_COMPOUND_FILE_s[] = {
 		IndexFileNames::FIELD_INFOS_EXTENSION,
@@ -67,7 +75,14 @@ CL_NS_DEF(index)
 		IndexFileNames::VECTORS_FIELDS_EXTENSION,
 		IndexFileNames::NORMS_EXTENSION
 	};
-	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::INDEX_EXTENSIONS_IN_COMPOUND_FILE(IndexFileNames_INDEX_EXTENSIONS_IN_COMPOUND_FILE_s, 11 );
+	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::_INDEX_EXTENSIONS_IN_COMPOUND_FILE;
+  CL_NS(util)::ConstValueArray<const char*>& IndexFileNames::INDEX_EXTENSIONS_IN_COMPOUND_FILE(){
+    if ( _INDEX_EXTENSIONS_IN_COMPOUND_FILE.length == 0 ){
+      _INDEX_EXTENSIONS_IN_COMPOUND_FILE.values = IndexFileNames_INDEX_EXTENSIONS_IN_COMPOUND_FILE_s;
+      _INDEX_EXTENSIONS_IN_COMPOUND_FILE.length = 11;
+    }
+    return _INDEX_EXTENSIONS_IN_COMPOUND_FILE;
+  }
 
 	const char* IndexFileNames_STORE_INDEX_EXTENSIONS_s[] = {
 		IndexFileNames::VECTORS_INDEX_EXTENSION,
@@ -76,7 +91,14 @@ CL_NS_DEF(index)
 		IndexFileNames::FIELDS_INDEX_EXTENSION,
 		IndexFileNames::FIELDS_EXTENSION
 	};
-	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::STORE_INDEX_EXTENSIONS(IndexFileNames_STORE_INDEX_EXTENSIONS_s, 5 );
+	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::_STORE_INDEX_EXTENSIONS;
+  CL_NS(util)::ConstValueArray<const char*>& IndexFileNames::STORE_INDEX_EXTENSIONS(){
+    if ( _STORE_INDEX_EXTENSIONS.length == 0 ){
+      _STORE_INDEX_EXTENSIONS.values = IndexFileNames_STORE_INDEX_EXTENSIONS_s;
+      _STORE_INDEX_EXTENSIONS.length = 5;
+    }
+    return _STORE_INDEX_EXTENSIONS;
+  }
 	
 	const char* IndexFileNames_NON_STORE_INDEX_EXTENSIONS_s[] = {
 		IndexFileNames::FIELD_INFOS_EXTENSION,
@@ -86,7 +108,14 @@ CL_NS_DEF(index)
 		IndexFileNames::TERMS_INDEX_EXTENSION,
 		IndexFileNames::NORMS_EXTENSION
 	};
-	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::NON_STORE_INDEX_EXTENSIONS(IndexFileNames_NON_STORE_INDEX_EXTENSIONS_s, 6 );
+	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::_NON_STORE_INDEX_EXTENSIONS;
+  CL_NS(util)::ConstValueArray<const char*>& IndexFileNames::NON_STORE_INDEX_EXTENSIONS(){
+    if ( _NON_STORE_INDEX_EXTENSIONS.length == 0 ){
+      _NON_STORE_INDEX_EXTENSIONS.values = IndexFileNames_NON_STORE_INDEX_EXTENSIONS_s;
+      _NON_STORE_INDEX_EXTENSIONS.length = 6;
+    }
+    return _NON_STORE_INDEX_EXTENSIONS;
+  }
 
 	const char* IndexFileNames_COMPOUND_EXTENSIONS_s[] = {
 		IndexFileNames::FIELD_INFOS_EXTENSION,
@@ -97,14 +126,28 @@ CL_NS_DEF(index)
 		IndexFileNames::TERMS_INDEX_EXTENSION,
 		IndexFileNames::TERMS_EXTENSION
 	};
-	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::COMPOUND_EXTENSIONS(IndexFileNames_COMPOUND_EXTENSIONS_s, 7 );
+	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::_COMPOUND_EXTENSIONS;
+  CL_NS(util)::ConstValueArray<const char*>& IndexFileNames::COMPOUND_EXTENSIONS(){
+    if ( _COMPOUND_EXTENSIONS.length == 0 ){
+      _COMPOUND_EXTENSIONS.values = IndexFileNames_COMPOUND_EXTENSIONS_s;
+      _COMPOUND_EXTENSIONS.length = 7;
+    }
+    return _COMPOUND_EXTENSIONS;
+  }
 
 	const char* IndexFileNames_VECTOR_EXTENSIONS_s[] = {
 		IndexFileNames::VECTORS_INDEX_EXTENSION,
 		IndexFileNames::VECTORS_DOCUMENTS_EXTENSION,
 		IndexFileNames::VECTORS_FIELDS_EXTENSION
 	};
-	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::VECTOR_EXTENSIONS(IndexFileNames_VECTOR_EXTENSIONS_s, 3 );
+	CL_NS(util)::ConstValueArray<const char*> IndexFileNames::_VECTOR_EXTENSIONS;
+  CL_NS(util)::ConstValueArray<const char*>& IndexFileNames::VECTOR_EXTENSIONS(){
+    if ( _VECTOR_EXTENSIONS.length == 0 ){
+      _VECTOR_EXTENSIONS.values = IndexFileNames_VECTOR_EXTENSIONS_s;
+      _VECTOR_EXTENSIONS.length = 3;
+    }
+    return _VECTOR_EXTENSIONS;
+  }
 
 	string IndexFileNames::fileNameFromGeneration( const char* base, const char* extension, int64_t gen ) {
 		if ( gen == SegmentInfo::NO ) {
@@ -125,8 +168,8 @@ CL_NS_DEF(index)
 		if ( p != NULL && strcmp( p+1, COMPOUND_FILE_STORE_EXTENSION ) == 0 ) {
 			return true;
 		}
-		for ( int32_t i = 0; i < STORE_INDEX_EXTENSIONS_LENGTH; i++ ) {
-			if ( p != NULL && strcmp( p+1, STORE_INDEX_EXTENSIONS[i] ) == 0 ) {
+		for ( int32_t i = 0; i < STORE_INDEX_EXTENSIONS().length; i++ ) {
+			if ( p != NULL && strcmp( p+1, STORE_INDEX_EXTENSIONS()[i] ) == 0 ) {
 				return true;
 			}
 		}

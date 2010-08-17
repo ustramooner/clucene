@@ -45,9 +45,6 @@ CL_NS_DEF(store)
 	   lastModified = Misc::currentTimeMillis();
 	   this->directory = _directory;
 	   sizeInBytes = 0;
-     #ifdef _DEBUG
-     filename = NULL;
-     #endif
   }
 
   RAMFile::~RAMFile(){
@@ -554,9 +551,6 @@ CL_NS_DEF(store)
 	}
 
     RAMFile* file = _CLNEW RAMFile();
-    #ifdef _DEBUG
-      file->filename = n;
-    #endif
     (*files)[n] = file;
 
     return _CLNEW RAMOutputStream(file);

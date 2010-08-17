@@ -24,7 +24,8 @@ public:
  * @version $rcs = ' $Id: Exp $ ' ;
  */
 class IndexFileNameFilter: public FilenameFilter {
-  static IndexFileNameFilter* singleton;
+  static IndexFileNameFilter* _singleton;
+  static IndexFileNameFilter* singleton();
   CL_NS(util)::CLHashSet<const char*, CL_NS(util)::Compare::Char> extensions;
   CL_NS(util)::CLHashSet<const char*, CL_NS(util)::Compare::Char> extensionsInCFS;
 public:

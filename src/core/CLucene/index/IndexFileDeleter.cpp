@@ -127,7 +127,7 @@ IndexFileDeleter::IndexFileDeleter(Directory* directory, IndexDeletionPolicy* po
 
 	for(size_t i=0;i<files.size();i++) {
 
-	  string& fileName = files[i];
+	  string& fileName = files.at(i);
 
     if (filter->accept(NULL, fileName.c_str()) && !fileName.compare(IndexFileNames::SEGMENTS_GEN) == 0) {
 
