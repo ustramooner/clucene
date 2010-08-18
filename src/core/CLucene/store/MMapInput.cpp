@@ -5,11 +5,11 @@
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
 #include "CLucene/_ApiHeader.h"
-#if defined(LUCENE_FS_MMAP)
 
 #include "FSDirectory.h"
 #include "_MMapIndexInput.h"
 #include "CLucene/util/Misc.h"
+#include <fcntl.h>
 
 #include <fcntl.h>
 #ifdef _CL_HAVE_IO_H
@@ -30,6 +30,7 @@
 #ifdef _CL_HAVE_WINERROR_H
 	#include <winerror.h>
 #endif
+#include <errno.h>
 
 #if defined(_CL_HAVE_FUNCTION_MAPVIEWOFFILE)
     typedef int HANDLE;
@@ -110,15 +111,21 @@ CL_NS_USE(util)
         }
     };
 
-	MMapIndexInput::MMapIndexInput(const char* path):
-	    _internal(_CLNEW Internal)
+	MMapIndexInput::MMapIndexInput(Internal* __internal):
+	    _internal(__internal)
 	{
+  }
+  
+  bool MMapIndexInput::open(const char* path, IndexInput*& ret, CLuceneError& error, int32_t __bufferSize )    {
+
 	//Func - Constructor.
 	//       Opens the file named path
 	//Pre  - path != NULL
 	//Post - if the file could not be opened  an exception is thrown.
 
 	  CND_PRECONDITION(path != NULL, "path is NULL");
+
+    Internal* _internal = _CLNEW Internal;
 
 #if defined(_CL_HAVE_FUNCTION_MAPVIEWOFFILE)
 	  _internal->mmaphandle = NULL;
@@ -128,13 +135,13 @@ CL_NS_USE(util)
 	  if (_internal->fhandle < 0){
 		_cl_dword_t err = GetLastError();
         if ( err == ERROR_FILE_NOT_FOUND )
-		    _CLTHROWA(CL_ERR_IO, "File does not exist");
+        error.set(CL_ERR_IO, "File does not exist");
         else if ( err == ERROR_ACCESS_DENIED )
-            _CLTHROWA(ERROR_ACCESS_DENIED, "File Access denied");
+        error.set(CL_ERR_IO, "File Access denied");
         else if ( err == ERROR_TOO_MANY_OPEN_FILES )
-            _CLTHROWA(CL_ERR_IO, "Too many open files");
+        error.set(CL_ERR_IO, "Too many open files");
 		else
-			_CLTHROWA(CL_ERR_IO, "File IO Error");
+          error.set(CL_ERR_IO, "Could not open file");
 	  }
 
 	  _cl_dword_t dummy=0;
@@ -146,7 +153,8 @@ CL_NS_USE(util)
 				void* address = MapViewOfFile(_internal->mmaphandle,FILE_MAP_READ,0,0,0);
 				if ( address != NULL ){
 					_internal->data = (uint8_t*)address;
-					return; //SUCCESS!
+          ret = _CLNEW MMapInput(_internal);
+          return true;
 				}
 			}
 			
@@ -160,18 +168,19 @@ CL_NS_USE(util)
 			char* errstr = _CL_NEWARRAY(char, len); 
 			cl_sprintf(errstr, "MMapIndexInput::MMapIndexInput failed with error %d: %s", len, errnum, lpMsgBuf); 
 	
-			_CLTHROWA_DEL(CL_ERR_IO,errstr);
+	    error.set(CL_ERR_IO, errstr);
+			_CLDELETE_CaARRAY(errstr);
 	  }
 
 #else //_CL_HAVE_FUNCTION_MAPVIEWOFFILE
-	 _internal->fhandle = ::open (path, O_RDONLY);
+     _internal->fhandle = ::_cl_open (path, _O_BINARY | O_RDONLY | _O_RANDOM, _S_IREAD);
   	 if (_internal->fhandle < 0){
-		_CLTHROWA(CL_ERR_IO,strerror(errno));	
+	    error.set(CL_ERR_IO, strerror(errno));
   	 }else{
 		// stat it
 		struct stat sb;
 		if (::fstat (_internal->fhandle, &sb)){
-			_CLTHROWA(CL_ERR_IO,strerror(errno));
+	    error.set(CL_ERR_IO, strerror(errno));
 		}else{
 			// get length from stat
 			_internal->_length = sb.st_size;
@@ -179,13 +188,18 @@ CL_NS_USE(util)
 			// mmap the file
 			void* address = ::mmap(0, _internal->_length, PROT_READ, MAP_SHARED, _internal->fhandle, 0);
 			if (address == MAP_FAILED){
-				_CLTHROWA(CL_ERR_IO,strerror(errno));
+				error.set(CL_ERR_IO, strerror(errno));
 			}else{
 				_internal->data = (uint8_t*)address;
+        ret = _CLNEW MMapIndexInput(_internal);
+        return true;
 			}
 		}
   	 }
 #endif
+
+    _CLDELETE(_internal);
+    return false;
   }
 
   MMapIndexInput::MMapIndexInput(const MMapIndexInput& clone): IndexInput(clone){
@@ -282,4 +296,3 @@ CL_NS_USE(util)
 
 
 CL_NS_END
-#endif
