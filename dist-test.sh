@@ -71,11 +71,10 @@ fi
 #check to see that no #ifdefs exist in headers that don't belong
 function checkForIfdefs {
     I=0
-    grep "#if" $1| grep -v "_UCS2" |grep -v "_CL_HAVE_" |grep -v "_ASCII" |grep -v "_WIN32" |grep -v "_WIN64" | while read line; do
+    grep "#if" $1| grep -v "_UCS2" |grep -v "_CL_HAVE_" |grep -v "_ASCII" |grep -v "_WIN32"|grep -v "_MSC_"|grep -v "__MINGW32__" |grep -v "_WIN64" | while read line; do
         I=`expr $I + 1`
         if [ $I -gt 1 ]; then
-            echo $1 has invalid ifdef: $line
-            FAIL=1
+            echo $1 might have invalid ifdef: $line
         fi
     done
 }
@@ -150,7 +149,7 @@ if [ $t_c_h -eq 1 ] || [ $t_ifdefs -eq 1 ] || [ $t_exports -eq 1 ]; then
             echo "#include \"CLucene/StdHeader.h"\" >$TMP/pub-header.cpp
             echo "#include \"$H"\" >>$TMP/pub-header.cpp
             echo "int main(){ return 0; }" >>"$TMP/pub-header.cpp"
-            ERROR=`g++ -I. -I$TMP/src/shared -I./src/shared -I$TMP/src/core $TMP/pub-header.cpp`
+            ERROR=`g++ -I. -I$TMP/src/shared -I./src/shared -I../src/ext -I$TMP/src/core $TMP/pub-header.cpp`
             if [ $? -ne 0 ]; then 
               echo ""
             	echo "$H doesn't compile seperately..."
@@ -159,6 +158,20 @@ if [ $t_c_h -eq 1 ] || [ $t_ifdefs -eq 1 ] || [ $t_exports -eq 1 ]; then
             fi
         fi
     done
+    
+    
+    if [ $t_ifdefs -eq 1 ]; then
+      echo "Not all ifdefs are invalid, you have to figure it out for yourself :-)"
+      echo "If defs in classes which change depending on a user setting can cause big problems due to offset changes"
+      echo "for example:"
+      echo "class X {"
+      echo " #ifdef _DEBUG"
+      echo "  int x;"
+      echo " #endif"
+      echo " int y;"
+      echo "}"
+      echo "If the library is compiled with _DEBUG, and then a user calls y without _DEBUG defined, unexpected behaviour will occur"
+    fi
 fi
 
 #iterate all our code...
@@ -195,7 +208,7 @@ fi
 
 #test if headers can compile together by themselves:
 if [ $t_c_all -eq 1 ]; then
-    g++ -I$TMP/src -I$TMP/src/shared -I$TMP/src/core $TMP/pub-headers.cpp -I./src/shared
+    g++ -I$TMP/src -I../src/ext -I$TMP/src/shared -I$TMP/src/core $TMP/pub-headers.cpp -I./src/shared
 fi
 
 if [ $t_inline -eq 1 ]; then
@@ -237,11 +250,18 @@ if [ $t_compile -eq 1 ]; then
         FAIL=1; 
     fi
     
+    echo "Undefines for shared lib:"
+    nm -u --demangle bin/libclucene-shared.so |grep -E "lucene::"
+    echo "Undefines for core lib:"
+    nm -u --demangle bin/libclucene-core.so |grep -E "lucene::"|grep -v "lucene::util::Misc" |grep -v "lucene::util::mutex" |grep -v "lucene::util::StringBuffer"|grep -v "lucene::util::shared_condition"
+
     #compile together
     make test-all
     if [ $? -ne 0 ]; then 
         FAIL=1; 
     fi
+    
+    
 fi
 
 
