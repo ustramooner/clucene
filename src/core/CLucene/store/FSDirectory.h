@@ -109,8 +109,6 @@ CL_CLASS_DEF(util,StringBuffer)
 		/// Returns a stream reading an existing file.
 		bool openInput(const char* name, IndexInput*& ret, CLuceneError& err, int32_t bufferSize=-1);
 
-		IndexInput* openMMapFile(const char* name, int32_t bufferSize=LUCENE_STREAM_BUFFER_SIZE);
-
 		/// Renames an existing file in the directory.
 		void renameFile(const char* from, const char* to);
 

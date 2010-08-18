@@ -8,6 +8,7 @@
 #define _lucene_store_MMap_
 
 #include "IndexInput.h"
+#include "_MMapDirectory.h"
 
 CL_NS_DEF(store)
 

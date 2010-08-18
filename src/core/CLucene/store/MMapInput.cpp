@@ -8,7 +8,7 @@
 #if defined(LUCENE_FS_MMAP)
 
 #include "FSDirectory.h"
-#include "_MMap.h"
+#include "_MMapIndexInput.h"
 #include "CLucene/util/Misc.h"
 
 #include <fcntl.h>
