@@ -16,8 +16,10 @@ CL_NS_DEF(store)
 		Internal* _internal;
 
 		MMapIndexInput(const MMapIndexInput& clone);
+		MMapIndexInput(Internal* _internal);
 	public:
-		MMapIndexInput(const char* path);
+    static bool open(const char* path, IndexInput*& ret, CLuceneError& error, int32_t __bufferSize );
+
 		~MMapIndexInput();
 		IndexInput* clone() const;
 
@@ -29,8 +31,9 @@ CL_NS_DEF(store)
 		void seek(const int64_t pos);
 		int64_t length() const;
 
-		const char* getObjectName(){ return MMapIndexInput::getClassName(); }
+		const char* getObjectName() const{ return MMapIndexInput::getClassName(); }
 		static const char* getClassName(){ return "MMapIndexInput"; }			
+    const char* getDirectoryType() const{ return MMapDirectory::getClassName(); }
 	};
 CL_NS_END
 #endif
