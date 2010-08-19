@@ -153,7 +153,7 @@ CL_NS_USE(util)
 				void* address = MapViewOfFile(_internal->mmaphandle,FILE_MAP_READ,0,0,0);
 				if ( address != NULL ){
 					_internal->data = (uint8_t*)address;
-          ret = _CLNEW MMapInput(_internal);
+          ret = _CLNEW MMapIndexInput(_internal);
           return true;
 				}
 			}
@@ -166,7 +166,7 @@ CL_NS_USE(util)
 			char* lpMsgBuf=strerror(errnum);
 			size_t len = strlen(lpMsgBuf)+80;
 			char* errstr = _CL_NEWARRAY(char, len); 
-			cl_sprintf(errstr, "MMapIndexInput::MMapIndexInput failed with error %d: %s", len, errnum, lpMsgBuf); 
+			cl_sprintf(errstr, len, "MMapIndexInput::MMapIndexInput failed with error %d: %s", errnum, lpMsgBuf); 
 	
 	    error.set(CL_ERR_IO, errstr);
 			_CLDELETE_CaARRAY(errstr);
