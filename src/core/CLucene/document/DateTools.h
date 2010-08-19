@@ -25,69 +25,71 @@
 CL_NS_DEF(document)
 
 class CLUCENE_EXPORT DateTools {
+private:
+  static void strCatDate(TCHAR* buf, int zeroes, int value);
 public:
 
-	enum Resolution {
-		NO_RESOLUTION,
-		YEAR_FORMAT,		// yyyy
-		MONTH_FORMAT,		// yyyyMM
-		DAY_FORMAT,			// yyyyMMdd
-		HOUR_FORMAT,		// yyyyMMddHH
-		MINUTE_FORMAT,		// yyyyMMddHHmm
-		SECOND_FORMAT,		// yyyyMMddHHmmss
-		MILLISECOND_FORMAT	// yyyyMMddHHmmssSSS
-	};
-	
-	/**
-	* Converts a millisecond time to a string suitable for indexing.
-	* 
-	* @param time the date expressed as milliseconds since January 1, 1970, 00:00:00 GMT
-	* @param resolution the desired resolution, see {@link #Resolution}
-	* @return a string in format <code>yyyyMMddHHmmssSSS</code> or shorter,
-	*  depeding on <code>resolution</code>; using UTC as timezone
-	*/
-	static TCHAR* timeToString(const int64_t time, Resolution resolution = MILLISECOND_FORMAT);
+  enum Resolution {
+          NO_RESOLUTION,
+          YEAR_FORMAT,		// yyyy
+          MONTH_FORMAT,		// yyyyMM
+          DAY_FORMAT,			// yyyyMMdd
+          HOUR_FORMAT,		// yyyyMMddHH
+          MINUTE_FORMAT,		// yyyyMMddHHmm
+          SECOND_FORMAT,		// yyyyMMddHHmmss
+          MILLISECOND_FORMAT	// yyyyMMddHHmmssSSS
+  };
 
-	static void timeToString(const int64_t time, Resolution resolution, TCHAR* buf, size_t bufLength);
+  /**
+  * Converts a millisecond time to a string suitable for indexing.
+  *
+  * @param time the date expressed as milliseconds since January 1, 1970, 00:00:00 GMT
+  * @param resolution the desired resolution, see {@link #Resolution}
+  * @return a string in format <code>yyyyMMddHHmmssSSS</code> or shorter,
+  *  depeding on <code>resolution</code>; using UTC as timezone
+  */
+  static TCHAR* timeToString(const int64_t time, Resolution resolution = MILLISECOND_FORMAT);
 
-	/**
-	* Converts a string produced by <code>timeToString</code> or
-	* <code>dateToString</code> back to a time, represented as the
-	* number of milliseconds since January 1, 1970, 00:00:00 GMT.
-	* 
-	* @param dateString the date string to be converted
-	* @return the number of milliseconds since January 1, 1970, 00:00:00 GMT
-	* @throws ParseException if <code>dateString</code> is not in the 
-	*  expected format 
-	*/
-	static int64_t stringToTime(const TCHAR* dateString);
+  static void timeToString(const int64_t time, Resolution resolution, TCHAR* buf, size_t bufLength);
 
-    static tm* stringToDate(const TCHAR* dateString);
+  /**
+  * Converts a string produced by <code>timeToString</code> or
+  * <code>dateToString</code> back to a time, represented as the
+  * number of milliseconds since January 1, 1970, 00:00:00 GMT.
+  *
+  * @param dateString the date string to be converted
+  * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT
+  * @throws ParseException if <code>dateString</code> is not in the
+  *  expected format
+  */
+  static int64_t stringToTime(const TCHAR* dateString);
 
-    /****
+  static tm* stringToDate(const TCHAR* dateString);
 
-    *   CLucene specific methods
+  /****
 
-    *****/
+  *   CLucene specific methods
 
-    /**
-    * Returns a 64bit time value based on the parameters passed
-    */
-    static int64_t getTime(unsigned short year, uint8_t month, uint8_t mday, uint8_t hours = 0,
-        uint8_t minutes = 0, uint8_t seconds = 0, unsigned short ms = 0);
+  *****/
 
-    /**
-    * Returns a 64bit time value which is inclusive of the whole last day.
-    */
-    static int64_t timeMakeInclusive(const int64_t time);
+  /**
+  * Returns a 64bit time value based on the parameters passed
+  */
+  static int64_t getTime(unsigned short year, uint8_t month, uint8_t mday, uint8_t hours = 0,
+      uint8_t minutes = 0, uint8_t seconds = 0, unsigned short ms = 0);
 
-    inline static int64_t getDifferenceFromGMT();
+  /**
+  * Returns a 64bit time value which is inclusive of the whole last day.
+  */
+  static int64_t timeMakeInclusive(const int64_t time);
 
-    static TCHAR* getISOFormat(const int64_t time);
-    static TCHAR* getISOFormat(unsigned short year, uint8_t month, uint8_t mday, uint8_t hours = 0,
-        uint8_t minutes = 0, uint8_t seconds = 0, unsigned short ms = 0);
+  inline static int64_t getDifferenceFromGMT();
 
-	virtual ~DateTools();
+  static TCHAR* getISOFormat(const int64_t time);
+  static TCHAR* getISOFormat(unsigned short year, uint8_t month, uint8_t mday, uint8_t hours = 0,
+      uint8_t minutes = 0, uint8_t seconds = 0, unsigned short ms = 0);
+
+  virtual ~DateTools();
 	
 };
 CL_NS_END

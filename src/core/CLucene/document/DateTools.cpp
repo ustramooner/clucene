@@ -56,116 +56,118 @@ tm* DateTools::stringToDate(const TCHAR* dateString){
 }
 
 int64_t DateTools::stringToTime(const TCHAR* dateString) {
-	tm s_time;
-	memset(&s_time, 0, sizeof(s_time));
-	s_time.tm_mday=1;
-	int32_t ms = 0;
+  tm s_time;
+  memset(&s_time, 0, sizeof (s_time));
+  s_time.tm_mday = 1;
+  int32_t ms = 0;
 
-	switch (_tcslen(dateString)) {
-		case 4: // YEAR_FORMAT
-			{
-				s_time.tm_year = _ttoi( dateString ) - 1900;
-				break;
-			}
-		case 6: // MONTH_FORMAT
-			{
-				TCHAR* tmpDate = STRDUP_TtoT(dateString);
-				s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
-				tmpDate[4] = 0;
-				s_time.tm_year = _ttoi( tmpDate ) - 1900;
-				delete[] tmpDate;
-				break;
-			}
-		case 8: // DAY_FORMAT
-			{
-				TCHAR* tmpDate = STRDUP_TtoT(dateString);
-				s_time.tm_mday = _ttoi(&tmpDate[6]);
-				tmpDate[6] = 0;
-				s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
-				tmpDate[4] = 0;
-				s_time.tm_year = _ttoi( tmpDate ) - 1900;
-				delete[] tmpDate;
-				break;
-			}
-		case 10: // HOUR_FORMAT
-			{
-				TCHAR* tmpDate = STRDUP_TtoT(dateString);
-				s_time.tm_hour = _ttoi(&tmpDate[8]);
-				tmpDate[8] = 0;
-				s_time.tm_mday = _ttoi(&tmpDate[6]);
-				tmpDate[6] = 0;
-				s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
-				tmpDate[4] = 0;
-				s_time.tm_year = _ttoi( tmpDate ) - 1900;
-				delete[] tmpDate;
-				break;
-			}
-		case 12: // MINUTE_FORMAT
-			{
-				TCHAR* tmpDate = STRDUP_TtoT(dateString);
-				s_time.tm_min = _ttoi(&tmpDate[10]);
-				tmpDate[10] = 0;
-				s_time.tm_hour = _ttoi(&tmpDate[8]);
-				tmpDate[8] = 0;
-				s_time.tm_mday = _ttoi(&tmpDate[6]);
-				tmpDate[6] = 0;
-				s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
-				tmpDate[4] = 0;
-				s_time.tm_year = _ttoi( tmpDate ) - 1900;
-				delete[] tmpDate;
-				break;
-			}
-		case 14: // SECOND_FORMAT
-			{
-				TCHAR* tmpDate = STRDUP_TtoT(dateString);
-				s_time.tm_sec = _ttoi(&tmpDate[12]);
-				tmpDate[12] = 0;
-				s_time.tm_min = _ttoi(&tmpDate[10]);
-				tmpDate[10] = 0;
-				s_time.tm_hour = _ttoi(&tmpDate[8]);
-				tmpDate[8] = 0;
-				s_time.tm_mday = _ttoi(&tmpDate[6]);
-				tmpDate[6] = 0;
-				s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
-				tmpDate[4] = 0;
-				s_time.tm_year = _ttoi( tmpDate ) - 1900;
-				delete[] tmpDate;
-				break;
-			}
-		case 17: // MILLISECOND_FORMAT
-			{
-				TCHAR* tmpDate = STRDUP_TtoT(dateString);
-				ms = _ttoi(&tmpDate[14]);
-				tmpDate[14] = 0;
-				s_time.tm_sec = _ttoi(&tmpDate[12]);
-				tmpDate[12] = 0;
-				s_time.tm_min = _ttoi(&tmpDate[10]);
-				tmpDate[10] = 0;
-				s_time.tm_hour = _ttoi(&tmpDate[8]);
-				tmpDate[8] = 0;
-				s_time.tm_mday = _ttoi(&tmpDate[6]);
-				tmpDate[6] = 0;
-				s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
-				tmpDate[4] = 0;
-				s_time.tm_year = _ttoi( tmpDate ) - 1900;
-				_CLDELETE_CARRAY(tmpDate);
-				break;
-			}
-		default:
-			{
-				_CLTHROWA(CL_ERR_Parse, "Input is not valid date string");
-				break;
-			}
-	}
+  switch (_tcslen(dateString)) {
+  case 4: // YEAR_FORMAT
+  {
+    s_time.tm_year = _ttoi(dateString) - 1900;
+    if (s_time.tm_year == -1900)
+      _CLTHROWA(CL_ERR_Parse, "Input is not valid date string");
+    break;
+  }
+  case 6: // MONTH_FORMAT
+  {
+    TCHAR* tmpDate = STRDUP_TtoT(dateString);
+    s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
+    tmpDate[4] = 0;
+    s_time.tm_year = _ttoi(tmpDate) - 1900;
+    _CLDELETE_CARRAY(tmpDate);
+    break;
+  }
+  case 8: // DAY_FORMAT
+  {
+    TCHAR* tmpDate = STRDUP_TtoT(dateString);
+    s_time.tm_mday = _ttoi(&tmpDate[6]);
+    tmpDate[6] = 0;
+    s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
+    tmpDate[4] = 0;
+    s_time.tm_year = _ttoi(tmpDate) - 1900;
+    _CLDELETE_CARRAY(tmpDate);
+    break;
+  }
+  case 10: // HOUR_FORMAT
+  {
+    TCHAR* tmpDate = STRDUP_TtoT(dateString);
+    s_time.tm_hour = _ttoi(&tmpDate[8]);
+    tmpDate[8] = 0;
+    s_time.tm_mday = _ttoi(&tmpDate[6]);
+    tmpDate[6] = 0;
+    s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
+    tmpDate[4] = 0;
+    s_time.tm_year = _ttoi(tmpDate) - 1900;
+    _CLDELETE_CARRAY(tmpDate);
+    break;
+  }
+  case 12: // MINUTE_FORMAT
+  {
+    TCHAR* tmpDate = STRDUP_TtoT(dateString);
+    s_time.tm_min = _ttoi(&tmpDate[10]);
+    tmpDate[10] = 0;
+    s_time.tm_hour = _ttoi(&tmpDate[8]);
+    tmpDate[8] = 0;
+    s_time.tm_mday = _ttoi(&tmpDate[6]);
+    tmpDate[6] = 0;
+    s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
+    tmpDate[4] = 0;
+    s_time.tm_year = _ttoi(tmpDate) - 1900;
+    _CLDELETE_CARRAY(tmpDate);
+    break;
+  }
+  case 14: // SECOND_FORMAT
+  {
+    TCHAR* tmpDate = STRDUP_TtoT(dateString);
+    s_time.tm_sec = _ttoi(&tmpDate[12]);
+    tmpDate[12] = 0;
+    s_time.tm_min = _ttoi(&tmpDate[10]);
+    tmpDate[10] = 0;
+    s_time.tm_hour = _ttoi(&tmpDate[8]);
+    tmpDate[8] = 0;
+    s_time.tm_mday = _ttoi(&tmpDate[6]);
+    tmpDate[6] = 0;
+    s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
+    tmpDate[4] = 0;
+    s_time.tm_year = _ttoi(tmpDate) - 1900;
+    _CLDELETE_CARRAY(tmpDate);
+    break;
+  }
+  case 17: // MILLISECOND_FORMAT
+  {
+    TCHAR* tmpDate = STRDUP_TtoT(dateString);
+    ms = _ttoi(&tmpDate[14]);
+    tmpDate[14] = 0;
+    s_time.tm_sec = _ttoi(&tmpDate[12]);
+    tmpDate[12] = 0;
+    s_time.tm_min = _ttoi(&tmpDate[10]);
+    tmpDate[10] = 0;
+    s_time.tm_hour = _ttoi(&tmpDate[8]);
+    tmpDate[8] = 0;
+    s_time.tm_mday = _ttoi(&tmpDate[6]);
+    tmpDate[6] = 0;
+    s_time.tm_mon = _ttoi(&tmpDate[4]) - 1;
+    tmpDate[4] = 0;
+    s_time.tm_year = _ttoi(tmpDate) - 1900;
+    _CLDELETE_CARRAY(tmpDate);
+    break;
+  }
+  default:
+  {
+    _CLTHROWA(CL_ERR_Parse, "Input is not valid date string");
+    break;
+  }
+  }
 
-	time_t t = mktime(&s_time);
-    if (t == -1)
-		_CLTHROWA(CL_ERR_Parse, "Input is not valid date string");
+  time_t t = mktime(&s_time);
+  if (t == -1)
+    _CLTHROWA(CL_ERR_Parse, "Input is not valid date string");
 
-    // Get TZ difference in seconds, and calc it in
-    const int64_t diff_secs = getDifferenceFromGMT();
+  // Get TZ difference in seconds, and calc it in
+  const int64_t diff_secs = getDifferenceFromGMT();
 
-	return (static_cast<int64_t>(t + diff_secs) * 1000) + ms;
+  return (static_cast<int64_t>(t + diff_secs) * 1000) + ms;
 }
 
 int64_t DateTools::getDifferenceFromGMT()
@@ -228,13 +230,39 @@ TCHAR* DateTools::getISOFormat(const int64_t time){
         ptm->tm_sec, ms);
 }
 
+void DateTools::strCatDate(TCHAR* buf, int zeroes, int value){
+  TCHAR str[10];
+  _i64tot(value, str, 10);
+  size_t l = _tcslen(str);
+
+  TCHAR* p = buf;
+  for ( size_t i=0;i<(zeroes-l);i++ ){
+    *p = _T('0');
+    p++;
+  }
+  _tcscat(p, str);
+  p+=l;
+  *p = _T('\0');
+}
 TCHAR* DateTools::getISOFormat(unsigned short year, uint8_t month, uint8_t mday, uint8_t hours,
         uint8_t minutes, uint8_t seconds, unsigned short ms)
 {
     TCHAR* ISOString = _CL_NEWARRAY(TCHAR, 24);
-    cl_stprintf(ISOString, 24, _T("%04d-%02d-%02d %02d:%02d:%02d:%03d"), year, month, mday,
-        hours, minutes, seconds, ms);
-    ISOString[23] = '\0';
+    TCHAR* p = ISOString;
+    strCatDate(p, 4, year); p+=4;
+    _tcscat(p, _T("-")); p++;
+    strCatDate(p, 2, month); p+=2;
+    _tcscat(p, _T("-")); p++;
+    strCatDate(p, 2, mday); p+=2;
+    _tcscat(p, _T(" ")); p++;
+    strCatDate(p, 2, hours); p+=2;
+    _tcscat(p, _T(":")); p++;
+    strCatDate(p, 2, minutes); p+=2;
+    _tcscat(p, _T(":")); p++;
+    strCatDate(p, 2, seconds); p+=2;
+    _tcscat(p, _T(":")); p++;
+    strCatDate(p, 3, ms); p+=3;
+
     return ISOString;
 }
 
