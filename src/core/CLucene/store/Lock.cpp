@@ -113,7 +113,7 @@ CL_NS_DEF(store)
    FSLock::FSLock( const char* _lockDir, const char* name, int filemode )
    {
       if ( filemode <= 0 )
-        this->filemode = _S_IREAD | _S_IWRITE; //must do this or file will be created Read only
+        this->filemode = _tcstoi64(_T("644"), NULL, 8); //must do this or file will be created Read only
       else
         this->filemode = filemode;
       

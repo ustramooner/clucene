@@ -102,12 +102,11 @@ void NoLockFactory::clearLock( const char* /*lockName*/ )
 
 FSLockFactory::FSLockFactory( const char* lockDir, int filemode )
 {
-	setLockDir( lockDir );
+  setLockDir( lockDir );
   if ( filemode > 0 )
     this->filemode = filemode;
   else
-    this->filemode = _S_IWRITE | _S_IREAD;
-	// TODO: Ensure that lockDir exists and is a directory
+    this->filemode = _tcstoi64(_T("644"), NULL, 8);
 }
 
 FSLockFactory::~FSLockFactory()

@@ -269,10 +269,9 @@ void FSDirectory::FSIndexInput::readInternal(uint8_t* b, const int32_t len) {
 	//O_RANDOM - Specifies that caching is optimized for, but not restricted to, random access from disk.
 	//O_WRONLY - Opens file for writing only;
     if ( filemode <= 0 ){
-      filemode = _S_IWRITE | _S_IREAD;
+      filemode = _tcstoi64(_T("644"), NULL, 8);
     }
-    bool bExists = Misc::dir_Exists(path);
-	  if ( bExists )
+	  if ( Misc::dir_Exists(path) )
 	    fhandle = _cl_open( path, _O_BINARY | O_RDWR | _O_RANDOM | O_TRUNC, filemode);
 	  else // added by JBP
 	    fhandle = _cl_open( path, _O_BINARY | O_RDWR | _O_RANDOM | O_CREAT, filemode);
@@ -364,6 +363,7 @@ void FSDirectory::FSIndexInput::readInternal(uint8_t* b, const int32_t len) {
    useMMap(LUCENE_USE_MMAP),
    filemode(_S_IWRITE | _S_IREAD) //default to user (only) writable index
   {
+    filemode = _tcstoi64(_T("644"), NULL, 8);
     this->lockFactory = NULL;
   }
 
@@ -505,8 +505,12 @@ void FSDirectory::FSIndexInput::readInternal(uint8_t* b, const int32_t len) {
 		SCOPED_LOCK_MUTEX(DIRECTORIES_LOCK)
 		dir = DIRECTORIES.get(file);
 		if ( dir == NULL  ){
-			dir = _CLNEW FSDirectory();
-      dir->init(file,lockFactory);
+      if ( getUseMMap() ){
+        dir = _CLNEW MMapDirectory();
+      }else{
+        dir = _CLNEW FSDirectory();
+      }
+      dir->init(_file,lockFactory);
 			DIRECTORIES.put( dir->directory.c_str(), dir);
 		} else {
 			if ( lockFactory != NULL && lockFactory != dir->getLockFactory() ) {
