@@ -63,7 +63,6 @@ void testIWmergePhraseSegments(CuTest *tc){
 	_CLDELETE(query1);
 	_CLDELETE(hits0);
 	_CLDELETE(hits1);
-    dir->close();
 	_CLDECDELETE(dir);
 }
 
@@ -481,6 +480,7 @@ void testWickedLongTerm(CuTest *tc) {
     _tcscat(contents, bigTerm);
     _tcscat(contents, _T(" another term"));
     doc->add(* _CLNEW Field(_T("content"), contents, Field::STORE_NO | Field::INDEX_TOKENIZED));
+    _CLDELETE_CARRAY(contents);
     writer->addDocument(doc);
     _CLLDELETE(doc);
 
@@ -490,6 +490,7 @@ void testWickedLongTerm(CuTest *tc) {
     writer->addDocument(doc);
     _CLLDELETE(doc);
     writer->close();
+    _CLDELETE(writer);
 
     IndexReader* reader = IndexReader::open(dir);
 
@@ -557,6 +558,7 @@ void testDeleteDocument(CuTest* tc) {
         TCHAR* contents = _CL_NEWARRAY(TCHAR, (size / 10) + 1);
         _i64tot(i, contents, 10);
         doc->add(* _CLNEW Field(_T("content"), contents, Field::STORE_NO | Field::INDEX_TOKENIZED));
+    	_CLDELETE_CARRAY(contents);
         writer->addDocument(doc);
         _CLDELETE_ARRAY( contents );
         _CLLDELETE(doc);
@@ -653,10 +655,7 @@ CuSuite *testindexwriter(void)
     SUITE_ADD_TEST(suite, testIWmergePhraseSegments);
     SUITE_ADD_TEST(suite, testIWlargeScaleCorrectness);
 
-    // TODO: This test fails due to differences between CLucene's StandardTokenizer and JLucene's; this test
-    // should work when the tokenizer will be brought up-to-date, 
-    //SUITE_ADD_TEST(suite, testWickedLongTerm);
-
+    SUITE_ADD_TEST(suite, testWickedLongTerm);
     SUITE_ADD_TEST(suite, testExceptionFromTokenStream);
     SUITE_ADD_TEST(suite, testDeleteDocument);
     SUITE_ADD_TEST(suite, testMergeIndex);
