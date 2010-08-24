@@ -256,8 +256,8 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CLuceneConfig.cmake"
 
 # install pkg-config file
 IF(NOT WIN32)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libclucene.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libclucene.pc)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libclucene.pc
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libclucene-core.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libclucene-core.pc @ONLY)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libclucene-core.pc
           DESTINATION ${LIB_DESTINATION}/pkgconfig )
 ENDIF(NOT WIN32)
 
