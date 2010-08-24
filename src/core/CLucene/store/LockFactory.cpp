@@ -106,7 +106,7 @@ FSLockFactory::FSLockFactory( const char* lockDir, int filemode )
   if ( filemode > 0 )
     this->filemode = filemode;
   else
-    this->filemode = _tcstoi64(_T("644"), NULL, 8);
+    this->filemode = 0644;
 }
 
 FSLockFactory::~FSLockFactory()

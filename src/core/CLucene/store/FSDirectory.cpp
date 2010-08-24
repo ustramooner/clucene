@@ -269,7 +269,7 @@ void FSDirectory::FSIndexInput::readInternal(uint8_t* b, const int32_t len) {
 	//O_RANDOM - Specifies that caching is optimized for, but not restricted to, random access from disk.
 	//O_WRONLY - Opens file for writing only;
     if ( filemode <= 0 ){
-      filemode = _tcstoi64(_T("644"), NULL, 8);
+      filemode = 0644;
     }
 	  if ( Misc::dir_Exists(path) )
 	    fhandle = _cl_open( path, _O_BINARY | O_RDWR | _O_RANDOM | O_TRUNC, filemode);
@@ -363,7 +363,7 @@ void FSDirectory::FSIndexInput::readInternal(uint8_t* b, const int32_t len) {
    useMMap(LUCENE_USE_MMAP),
    filemode(_S_IWRITE | _S_IREAD) //default to user (only) writable index
   {
-    filemode = _tcstoi64(_T("644"), NULL, 8);
+    filemode = 0644;
     this->lockFactory = NULL;
   }
 
