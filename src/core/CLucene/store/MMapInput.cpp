@@ -9,7 +9,6 @@
 #include "FSDirectory.h"
 #include "_MMapIndexInput.h"
 #include "CLucene/util/Misc.h"
-#include <fcntl.h>
 
 #include <fcntl.h>
 #ifdef _CL_HAVE_IO_H
