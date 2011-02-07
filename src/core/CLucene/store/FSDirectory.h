@@ -46,7 +46,7 @@ CL_CLASS_DEF(util,StringBuffer)
 		char* getLockPrefix() const;
 		static bool disableLocks;
 
-  static bool useMMap;
+    bool useMMap;
 
 	protected:
 		/// Removes an existing file in the directory.
@@ -121,13 +121,14 @@ CL_CLASS_DEF(util,StringBuffer)
     void close();
 
 	  /**
-    * Enable use of mmap reading.
+    * If MMap is available, this can disable use of
+	  * mmap reading.
 	  */
-    static void setUseMMap(bool value);
+    void setUseMMap(bool value);
 	  /**
-    * Gets whether the getDirectory() will return an MMap backed directory.
+    * Gets whether the directory is using MMap for inputstreams.
 	  */
-    static bool getUseMMap();
+    bool getUseMMap() const;
 
 	  std::string toString() const;
 

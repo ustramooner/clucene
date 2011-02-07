@@ -78,7 +78,7 @@ public:
         float_t scorerScore = scorer->score();
         float_t scorerScore2 = scorer->score();
         float_t scoreDiff = score > scorerScore ? score - scorerScore : scorerScore - score;
-        float_t scorerDiff = scorerScore2 > scorerScore ? scorerScore2 - scorerScore : scorerScore2;
+        float_t scorerDiff = scorerScore2 > scorerScore2 ? scorerScore2 - scorerScore : scorerScore - scorerScore2;
         if( ! more || doc != sdoc[ 0 ] || scoreDiff > QueryUtils::maxDiff || scorerDiff > QueryUtils::maxDiff )
         {
             StringBuffer buffer;
@@ -170,12 +170,16 @@ public:
             }
 
             float_t skipToScore = scorer->score();
-            if( ( skipToScore < -1 ? skipToScore * -1 : skipToScore ) > QueryUtils::maxDiff )
+            float_t sd = skipToScore - scorer->score();
+            if( ( sd < 0 ? sd * -1 : sd ) > QueryUtils::maxDiff )
             {
                 StringBuffer buffer;
                 buffer.append( _T( "unstable skipTo(" ));
                 buffer.appendInt( i );
-                buffer.append( _T( ") score!" ));
+                buffer.append( _T( ") score: " ));
+                buffer.appendFloat( skipToScore, 2 );
+                buffer.append( _T( "/") );
+                buffer.appendFloat( QueryUtils::maxDiff, 2 );
                 assertTrueMsg( buffer.getBuffer(), false );
             }
 

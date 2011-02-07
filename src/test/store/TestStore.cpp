@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 
-void StoreTest(CuTest *tc,int32_t count, bool ram){
+void StoreTest(CuTest *tc,int32_t count, int mode){
 	srand(1251971);
 	int32_t i;
 
@@ -19,7 +19,13 @@ void StoreTest(CuTest *tc,int32_t count, bool ram){
 
 	char fsdir[CL_MAX_PATH];
 	_snprintf(fsdir, CL_MAX_PATH, "%s/%s",cl_tempDir, "test.store");
-	Directory* store = (ram?(Directory*)_CLNEW RAMDirectory():(Directory*)FSDirectory::getDirectory(fsdir) );
+	Directory* store = NULL;
+	if ( mode == 1 )
+	  store = _CLNEW RAMDirectory();
+	else{
+	  store = (Directory*)FSDirectory::getDirectory(fsdir);
+	  ((FSDirectory*)store)->setUseMMap(mode == 3);
+	}
 	int32_t LENGTH_MASK = 0xFFF;
 	char name[260];
 
@@ -39,7 +45,7 @@ void StoreTest(CuTest *tc,int32_t count, bool ram){
 	}
 	CuMessageA(tc, "%d total milliseconds to create\n", (int32_t)(Misc::currentTimeMillis() - start));
 
-	if (!ram){
+	if (mode != 1){
 		store->close();
 		_CLDECDELETE(store);
 		store = (Directory*)FSDirectory::getDirectory(fsdir);
@@ -95,10 +101,13 @@ void StoreTest(CuTest *tc,int32_t count, bool ram){
 }
 
 void ramtest(CuTest *tc){
-	StoreTest(tc,1000,true);
+	StoreTest(tc,1000,1);
 }
 void fstest(CuTest *tc){
-	StoreTest(tc,100,false);
+	StoreTest(tc,100,2);
+}
+void mmaptest(CuTest *tc){
+	StoreTest(tc,100,3);
 }
 
 CuSuite *teststore(void)
@@ -107,6 +116,7 @@ CuSuite *teststore(void)
 
     SUITE_ADD_TEST(suite, ramtest);
     SUITE_ADD_TEST(suite, fstest);
+    SUITE_ADD_TEST(suite, mmaptest);
 
     return suite;
 }

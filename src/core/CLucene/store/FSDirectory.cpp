@@ -46,7 +46,6 @@ CL_NS_USE(util)
 
 	bool FSDirectory::disableLocks=false;
 
-
 	class FSDirectory::FSIndexInput:public BufferedIndexInput {
 		/**
 		* We used a shared handle between all the fsindexinput clones.
@@ -360,8 +359,7 @@ void FSDirectory::FSIndexInput::readInternal(uint8_t* b, const int32_t len) {
   FSDirectory::FSDirectory():
    Directory(),
    refCount(0),
-   useMMap(LUCENE_USE_MMAP),
-   filemode(_S_IWRITE | _S_IREAD) //default to user (only) writable index
+   useMMap(LUCENE_USE_MMAP)
   {
     filemode = 0644;
     this->lockFactory = NULL;
@@ -505,11 +503,7 @@ void FSDirectory::FSIndexInput::readInternal(uint8_t* b, const int32_t len) {
 		SCOPED_LOCK_MUTEX(DIRECTORIES_LOCK)
 		dir = DIRECTORIES.get(file);
 		if ( dir == NULL  ){
-      if ( getUseMMap() ){
-        dir = _CLNEW MMapDirectory();
-      }else{
-        dir = _CLNEW FSDirectory();
-      }
+      dir = _CLNEW FSDirectory();
       dir->init(_file,lockFactory);
 			DIRECTORIES.put( dir->directory.c_str(), dir);
 		} else {
