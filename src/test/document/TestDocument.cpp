@@ -173,7 +173,7 @@ public:
     CLUCENE_ASSERT(memcmp(shouldBe.values,bytes.values,4)==0);
 
     _CLDELETE(reader);
-    _CL_DECREF(&dir); //derefence since we are on the stack...
+    _CL_LDECREF(&dir); //derefence since we are on the stack...
   }
 
   void _TestDocumentWithOptions(CuTest *tc, int storeBit, FieldSelector::FieldSelectorResult fieldSelectorBit){
@@ -268,7 +268,7 @@ public:
 
     reader->close();
     _CLDELETE(reader);
-    _CL_DECREF(&ram); //this is in the stack...
+    _CL_LDECREF(&ram); //this is in the stack...
   }
 
 

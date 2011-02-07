@@ -99,7 +99,7 @@ void MockRAMDirectory::close() {
 	SCOPED_LOCK_MUTEX(openFiles_mutex);
 	if (noDeleteOpenFile && !openFiles.empty()) {
 		char buffer[200];
-		_snprintf(buffer, 200, "MockRAMDirectory: cannot close: there are still open files: %d", openFiles.size());
+		_snprintf(buffer, 200, "MockRAMDirectory: cannot close: there are still open files: %d", (int)openFiles.size());
 		_CLTHROWA(CL_ERR_IO, buffer);
 	}
 }
@@ -269,7 +269,7 @@ void MockRAMOutputStream::writeBytes(const uint8_t* b, const int32_t length) {
 		}
 
 		char buffer[200];
-		_snprintf(buffer, 200, "MockRAMOutputStream: fake disk full at %d bytes", dir->getRecomputedActualSizeInBytes());
+		_snprintf(buffer, 200, "MockRAMOutputStream: fake disk full at %d bytes", (int)dir->getRecomputedActualSizeInBytes());
 		_CLTHROWA(CL_ERR_IO, buffer);
 	} else {
 		RAMOutputStream::writeBytes(b, length);

@@ -26,6 +26,7 @@ _LUCENE_THREAD_FUNC(searchDocs, _searcher) {
     _CLLDELETE(query);
 
     CONDITION_WAIT(deleteMutex, deleteCondition);
+    _LUCENE_THREAD_FUNC_RETURN(0);
 }
 
 void testEndThreadException(CuTest *tc) {

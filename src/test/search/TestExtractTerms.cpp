@@ -11,7 +11,7 @@
 Directory * setUpIndex()
 {
     TCHAR       tbuffer[16];
-    TCHAR*      data[] = 
+    const TCHAR*      data[] = 
     {   
         _T( "aaaaa aaaab aaabb aabbb abbbb bbbbb" ),
         _T( "aaaaa aaaac aaacc aaccc acccc ccccc" )

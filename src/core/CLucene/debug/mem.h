@@ -20,6 +20,7 @@
 #endif
 #define _CL_POINTER(x) (x==NULL?NULL:(x->__cl_addref()>=0?x:x)) //return a add-ref'd object
 #define _CL_DECREF(x) ((x)==NULL?NULL:((x)->__cl_decref()>=0?(x):(x))) //return a add-ref'd object
+#define _CL_LDECREF(x) if ((x)!=NULL) (x)->__cl_decref();
 
 //Macro for creating new arrays
 #define _CL_NEWARRAY(type,size) (type*)calloc(size, sizeof(type))

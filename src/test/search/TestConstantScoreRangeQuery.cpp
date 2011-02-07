@@ -36,7 +36,7 @@ public:
     void setUp()
     {
         TCHAR       tbuffer[16];
-        TCHAR*      data[] = 
+        const TCHAR*      data[] = 
         {   
             _T( "A 1 2 3 4 5 6" ),
             _T( "Z       4 5 6" ),

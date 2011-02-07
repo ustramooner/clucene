@@ -82,7 +82,7 @@ void TestSpansAdvanced::doTestBooleanQueryWithSpanQueries( const float_t expecte
     query->add( spanQuery, false, BooleanClause::MUST );
     query->add( spanQuery, false, BooleanClause::MUST );
 
-    TCHAR * expectedIds[] = { _T( "1" ), _T( "2" ), _T( "3" ), _T( "4" ) };
+    const TCHAR * expectedIds[] = { _T( "1" ), _T( "2" ), _T( "3" ), _T( "4" ) };
     float_t expectedScores[] = { expectedScore, expectedScore, expectedScore, expectedScore };
 
     assertHits( query, _T( "two span queries" ), expectedIds, expectedScores, 4 );
@@ -92,7 +92,7 @@ void TestSpansAdvanced::doTestBooleanQueryWithSpanQueries( const float_t expecte
     _CLLDELETE( query );
 }
 
-void TestSpansAdvanced::assertHits( Query * query, const TCHAR * description, TCHAR ** expectedIds, float_t * expectedScores, size_t expectedCount )
+void TestSpansAdvanced::assertHits( Query * query, const TCHAR * description, const TCHAR ** expectedIds, float_t * expectedScores, size_t expectedCount )
 {
     float_t tolerance = 1e-5f;
 
@@ -122,11 +122,14 @@ void TestSpansAdvanced::assertHits( Query * query, const TCHAR * description, TC
         Document doc;
         searcher->doc( id, doc );
         assertTrueMsg( _T( "actual document does not match the expected one" ), 0 == _tcscmp( expectedIds[ i ], doc.get( field_id )));
-        assertTrueMsg( _T( "score does not match" ), abs( expectedScores[ i ] - score ) < tolerance );
+        assertTrueMsg( _T( "score does not match" ), ( expectedScores[ i ] > score ? expectedScores[ i ] - score : score - expectedScores[ i ] ) < tolerance );
         
         Explanation exp;
         searcher->explain( query, id, &exp );
-        assertTrueMsg( _T( "explained score does not match" ), abs( exp.getDetail( 0 )->getValue() - score ) < tolerance );
+        
+        float_t sd = exp.getDetail( 0 )->getValue() - score;
+        if ( sd < 0 ) sd *= -1;
+        assertTrueMsg( _T( "explained score does not match" ), sd < tolerance );
     }
 
     _CLLDELETE( topdocs );

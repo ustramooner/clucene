@@ -45,7 +45,7 @@ void TestSpansAdvanced2::testSingleSpanQuery()
 {
     Term * t1 = _CLNEW Term( field_text, _T( "should" ));
     Query * spanQuery = _CLNEW SpanTermQuery( t1 );
-    TCHAR * expectedIds[] = { _T( "B" ), _T( "D" ), _T( "1" ), _T( "2" ), _T( "3" ), _T( "4" ), _T( "A" ) };
+    const TCHAR * expectedIds[] = { _T( "B" ), _T( "D" ), _T( "1" ), _T( "2" ), _T( "3" ), _T( "4" ), _T( "A" ) };
     float_t expectedScores[] = { 0.625f, 0.45927936f, 0.35355338f, 0.35355338f, 0.35355338f, 0.35355338f, 0.26516503f, };
     assertHits( spanQuery, _T( "single span query" ), expectedIds, expectedScores, 7 );
     _CLLDELETE( spanQuery );
@@ -65,7 +65,7 @@ void TestSpansAdvanced2::testMultipleDifferentSpanQueries()
     query->add( spanQuery1, true, BooleanClause::MUST );
     query->add( spanQuery2, true, BooleanClause::MUST );
     
-    TCHAR * expectedIds[] = { _T( "D" ), _T( "A" ) };
+    const TCHAR * expectedIds[] = { _T( "D" ), _T( "A" ) };
     // these values were pre LUCENE-413
     // final float[] expectedScores = new float[] { 0.93163157f, 0.20698164f };
     float_t expectedScores[] = { 1.0191123f, 0.93163157f };

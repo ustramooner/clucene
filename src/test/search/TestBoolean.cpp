@@ -59,7 +59,7 @@ void testBooleanScorer(CuTest *tc) {
     const TCHAR* FIELD = _T("category");
     RAMDirectory directory;
 
-    TCHAR* values[] = { _T("1"), _T("2"), _T("3"), _T("4"), NULL};
+    const TCHAR* values[] = { _T("1"), _T("2"), _T("3"), _T("4"), NULL};
 
     try {
         WhitespaceAnalyzer a;
@@ -105,7 +105,7 @@ void testBooleanPrefixQuery(CuTest* tc) {
     RAMDirectory directory;
     WhitespaceAnalyzer a;
 
-    TCHAR* categories[] = {_T("food"), _T("foodanddrink"),
+    const TCHAR* categories[] = {_T("food"), _T("foodanddrink"),
         _T("foodanddrinkandgoodtimes"), _T("food and drink"), NULL};
 
     Query* rw1 = NULL;

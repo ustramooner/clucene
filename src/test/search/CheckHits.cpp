@@ -305,8 +305,11 @@ void CheckHits::checkEqual( CuTest* tc, Query * query, Hits * hits1, Hits * hits
             assertTrueMsg( buffer.getBuffer(), false );
         }
 
+        float_t sd = hits1->score( i ) -  hits2->score( i );
+        if ( sd < 0 ) sd *= -1;
+        
         if(( hits1->id( i ) != hits2->id( i ))
-            || abs( hits1->score( i ) -  hits2->score( i )) > scoreTolerance )
+            || sd > scoreTolerance )
         {
             StringBuffer buffer;
             buffer.append( _T( "Hit " ));
@@ -415,7 +418,7 @@ void CheckHits::verifyExplanation( CuTest* tc, const TCHAR * q, int32_t doc, flo
     
     float_t value = expl->getValue();
 
-    if( abs( score - value ) > EXPLAIN_SCORE_TOLERANCE_DELTA )
+    if( ( score > value ? score - value : value - score ) > EXPLAIN_SCORE_TOLERANCE_DELTA )
     {
         buffer.append( q );
         buffer.append( _T( ": score(doc=" ));
@@ -515,7 +518,7 @@ void CheckHits::verifyExplanation( CuTest* tc, const TCHAR * q, int32_t doc, flo
                 assertTrueMsg( _T( "should never get here!" ), false );
             }
 
-            if( abs( combined - value ) > EXPLAIN_SCORE_TOLERANCE_DELTA )
+            if( ( combined > value ? combined - value : value - combined ) > EXPLAIN_SCORE_TOLERANCE_DELTA )
             {
                 buffer.clear();
                 buffer.append( q );

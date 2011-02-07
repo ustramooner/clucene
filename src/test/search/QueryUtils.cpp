@@ -77,8 +77,8 @@ public:
         sdoc[ 0 ] = scorer->doc();
         float_t scorerScore = scorer->score();
         float_t scorerScore2 = scorer->score();
-        float_t scoreDiff = abs( score - scorerScore);
-        float_t scorerDiff = abs( scorerScore2 - scorerScore );
+        float_t scoreDiff = score > scorerScore ? score - scorerScore : scorerScore - score;
+        float_t scorerDiff = scorerScore2 > scorerScore ? scorerScore2 - scorerScore : scorerScore2;
         if( ! more || doc != sdoc[ 0 ] || scoreDiff > QueryUtils::maxDiff || scorerDiff > QueryUtils::maxDiff )
         {
             StringBuffer buffer;
@@ -170,7 +170,7 @@ public:
             }
 
             float_t skipToScore = scorer->score();
-            if( abs( skipToScore - scorer->score() ) > QueryUtils::maxDiff )
+            if( ( skipToScore < -1 ? skipToScore * -1 : skipToScore ) > QueryUtils::maxDiff )
             {
                 StringBuffer buffer;
                 buffer.append( _T( "unstable skipTo(" ));
@@ -179,7 +179,7 @@ public:
                 assertTrueMsg( buffer.getBuffer(), false );
             }
 
-            if( abs( skipToScore - score ) > QueryUtils::maxDiff )
+            if( ( skipToScore > score ? skipToScore - score : score - skipToScore ) > QueryUtils::maxDiff )
             {
                 StringBuffer buffer;
                 buffer.append( _T( "query assigned doc " ));

@@ -50,5 +50,5 @@ protected:
      *
      * @throws IOException
      */
-    void assertHits( Query * query, const TCHAR * description, TCHAR ** expectedIds, float_t * expectedScores, size_t expectedCount );
+    void assertHits( Query * query, const TCHAR * description, const TCHAR ** expectedIds, float_t * expectedScores, size_t expectedCount );
 };

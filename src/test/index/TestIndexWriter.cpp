@@ -258,7 +258,7 @@ void testHashingBug(CuTest *tc){
   writer.addDocument( &doc ); // ADDING SECOND DOCUMENT - will never return from this function
   writer.optimize();          // stucks in line 222-223
   writer.close();
-  _CL_DECREF(&dir);
+  _CL_LDECREF(&dir);
 }
 
 class IWlargeScaleCorrectness_tester {
