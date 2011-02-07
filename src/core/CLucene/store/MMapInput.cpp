@@ -255,6 +255,7 @@ CL_NS_USE(util)
   //       The instance has been destroyed
 
 	  close();
+	  _CLDELETE(_internal);
   }
 
   IndexInput* MMapIndexInput::clone() const
