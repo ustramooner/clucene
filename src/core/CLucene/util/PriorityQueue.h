@@ -7,6 +7,8 @@
 #ifndef _lucene_util_PriorityQueue_
 #define _lucene_util_PriorityQueue_
 
+#include <stdlib.h>
+
 CL_NS_DEF(util)
 
 /** A PriorityQueue maintains a partial ordering of its elements such that the

@@ -11,6 +11,7 @@
 #include <list>
 #include <set>
 #include <vector>
+#include <stdlib.h>
 //#include "CLucene/LuceneThreads.h"
 
 CL_NS_DEF(util)
