@@ -9,6 +9,7 @@
 
 //todo: this is a hack...
 #ifndef CND_PRECONDITION
+  #include <assert.h>
 	#define CND_PRECONDITION(x,y) assert(x)
 #endif
 
