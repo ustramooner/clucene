@@ -69,6 +69,13 @@ Solaris:
 I had problems when using the standard stl library. Using the -stlport4 switch worked. Had
 to specify compiler from the command line: cmake -DCXX_COMPILER=xxx -stlport4
 
+Building Performance
+--------------------
+Use of ccache will speed up build times a lot. I found it easiest to add the /usr/lib/ccache directory to the beginning of your paths. This works for most common compilers.
+
+PATH=/usr/lib/ccache:$PATH
+
+Note: you must do this BEFORE you configure the path, since you cannot change the compiler path after it is configured.
 
 Installing:
 -----------
