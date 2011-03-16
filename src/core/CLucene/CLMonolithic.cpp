@@ -88,6 +88,7 @@
 #include "CLucene/search/HitQueue.cpp"
 #include "CLucene/search/IndexSearcher.cpp"
 #include "CLucene/search/MatchAllDocsQuery.cpp"
+#include "CLucene/search/MultiPhraseQuery.cpp"
 #include "CLucene/search/MultiSearcher.cpp"
 #include "CLucene/search/MultiTermQuery.cpp"
 #include "CLucene/search/PhrasePositions.cpp"
