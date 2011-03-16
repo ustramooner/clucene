@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_CheckHits
+#define _lucene_search_CheckHits
+
 #include "test.h"
 
 class CheckHits 
@@ -112,4 +115,6 @@ public:
     static bool stringEndsWith( const TCHAR* tszStr, const TCHAR * tszEnd );
 
 };
+
+#endif
 

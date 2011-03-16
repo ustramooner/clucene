@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_spans_TestSpans
+#define _lucene_search_spans_TestSpans
+
 #include "test.h"
 
 #include "CLucene/search/spans/SpanTermQuery.h"
@@ -53,3 +56,5 @@ private:
     void orSpans( const TCHAR ** terms, size_t termsCount, Spans *& spans, Query *& query );
     void tstNextSpans( Spans * spans, int32_t doc, int32_t start, int32_t end );
 };
+#endif
+

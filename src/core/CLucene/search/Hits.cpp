@@ -170,7 +170,7 @@ CL_NS_DEF(search)
 	HitDoc* Hits::getHitDoc(const size_t n){
 		if (n >= _lengthAtStart){
 		    TCHAR buf[100];
-            _sntprintf(buf, 100,_T("Not a valid hit number: %d"),n);
+            _sntprintf(buf, 100,_T("Not a valid hit number: %d"), (int)n);
 			_CLTHROWT(CL_ERR_IndexOutOfBounds, buf );
 		}
 		if (n >= hitDocs->size())
@@ -178,7 +178,7 @@ CL_NS_DEF(search)
 
 		if (n >= _length) {
 		    TCHAR buf[100];
-            _sntprintf(buf, 100,_T("Not a valid hit number: %d"),n);
+            _sntprintf(buf, 100,_T("Not a valid hit number: %d"), (int)n);
 			_CLTHROWT(CL_ERR_ConcurrentModification, buf );
 		}
 

@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_spans_TestSpanExplanations
+#define _lucene_search_spans_TestSpanExplanations
+
 #include "../TestExplanations.h"
 
 /**
@@ -50,3 +53,5 @@ public:
     void testSNot7();
     void testSNot10();
 };
+#endif
+

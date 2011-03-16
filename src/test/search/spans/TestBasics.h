@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_spans_TestBasics
+#define _lucene_search_spans_TestBasics
+
 #include "test.h"
 
 /**
@@ -57,3 +60,5 @@ public:
 private:
     void checkHits( Query * query, int32_t * results, size_t resultsCount );
 };
+#endif
+

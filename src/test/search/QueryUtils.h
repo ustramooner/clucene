@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_QueryUtils
+#define _lucene_search_QueryUtils
+
 #include "test.h"
 
 class QueryUtils 
@@ -47,3 +50,5 @@ private:
     // check that first skip on just created scorers always goes to the right doc
     static void checkFirstSkipTo( CuTest* tc, Query * q, IndexSearcher * s );
 };
+#endif
+

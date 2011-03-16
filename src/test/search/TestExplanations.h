@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_TestExplanations
+#define _lucene_search_TestExplanations
+
 #include "test.h"
 
 CL_CLASS_DEF2(search,spans,SpanQuery);
@@ -144,3 +147,5 @@ public:
      */
     Query * reqB( Query * q );
 };
+#endif
+

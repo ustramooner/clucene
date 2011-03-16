@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_spans_TestNearSpansOrdered
+#define _lucene_search_spans_TestNearSpansOrdered
+
 #include "test.h"
 
 CL_CLASS_DEF2(search,spans,SpanNearQuery);
@@ -43,3 +46,5 @@ private:
   
     bool checkSpans( CL_NS2(search,spans)::Spans * spans, int32_t doc, int32_t start, int32_t end );
 };
+#endif
+

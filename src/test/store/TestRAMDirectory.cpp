@@ -20,7 +20,7 @@
 #include "CLucene/store/Directory.h"
 #include "CLucene/store/FSDirectory.h"
 #include "CLucene/store/RAMDirectory.h"
-#include "../../store/MockRAMDirectory.h"
+#include "MockRAMDirectory.h"
 
 /**
  * JUnit testcase to test RAMDirectory. RAMDirectory itself is used in many testcases,

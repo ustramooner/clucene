@@ -432,7 +432,7 @@ void CompoundFileWriter::copyFile(WriterFileEntry* source, IndexOutput* os, uint
          TCHAR buf[CL_MAX_PATH+100];
          _sntprintf(buf,CL_MAX_PATH+100,_T("Non-zero remainder length after copying")
             _T(": %d (id: %s, length: %d, buffer size: %d)"),
-            remainder,source->file,length,chunk );
+            (int)remainder,source->file,(int)length,(int)chunk );
 		    _CLTHROWT(CL_ERR_IO,buf);
       }
 
@@ -442,7 +442,7 @@ void CompoundFileWriter::copyFile(WriterFileEntry* source, IndexOutput* os, uint
       if (diff != length){
          TCHAR buf[100];
          _sntprintf(buf,100,_T("Difference in the output file offsets %d ")
-            _T("does not match the original file length %d"),diff,length);
+            _T("does not match the original file length %d"),(int)diff,(int)length);
          _CLTHROWT(CL_ERR_IO,buf);
       }
   } _CLFINALLY (

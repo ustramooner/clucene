@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_spans_TestSpansAdvanced
+#define _lucene_search_spans_TestSpansAdvanced
+
 #include "test.h"
 
 /*******************************************************************************
@@ -52,3 +55,5 @@ protected:
      */
     void assertHits( Query * query, const TCHAR * description, const TCHAR ** expectedIds, float_t * expectedScores, size_t expectedCount );
 };
+#endif
+

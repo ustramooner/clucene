@@ -4,6 +4,9 @@
 * Distributable under the terms of either the Apache License (Version 2.0) or
 * the GNU Lesser General Public License, as specified in the COPYING file.
 ------------------------------------------------------------------------------*/
+#ifndef _lucene_search_spans_TestSpanExplanationsOfNonMatches
+#define _lucene_search_spans_TestSpanExplanationsOfNonMatches
+
 #include "TestSpanExplanations.h"
 
 /**
@@ -21,3 +24,5 @@ public:
      */
     virtual void qtest( Query * q, int32_t * expDocNrs, size_t expDocNrsCount );
 };
+#endif
+

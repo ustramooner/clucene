@@ -44,6 +44,7 @@ SET(test_files ./tests.cpp
 ./document/TestField.cpp
 ./store/TestStore.cpp
 ./store/MockRAMDirectory.cpp
+./store/TestRAMDirectory.cpp
 ./search/MockScorer.h
 ./search/MockHitCollector.h
 ./search/TestBoolean.cpp
@@ -92,7 +93,6 @@ SET(test_files ./tests.cpp
 ./index/TestReuters.cpp
 ./index/TestAddIndexesNoOptimize.cpp
 ./index/TestTermVectorsReader.cpp
-./index/store/TestRAMDirectory.cpp
 ./util/TestPriorityQueue.cpp
 ./util/TestBitSet.cpp
 ./util/TestStringBuffer.cpp
